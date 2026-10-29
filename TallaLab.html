@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#eef4ff">
+<meta name="description" content="Tallaje escolar guiado: cámara con silueta, medidas verificadas y tablas de referencia identificadas.">
+<title>TallaLab · Uniformes con mejor referencia</title>
+<style>
+:root{--ink:#172b4d;--muted:#5d6d83;--blue:#1a60ce;--deep:#144da6;--pale:#e9f0ff;--line:#dce4ef;--bg:#f5f7fb;--green:#366344;--green-bg:#e6f2e4;--amber:#fff5df;--radius:24px;--shadow:0 6px 22px #153b6810}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}button,input,select,textarea{font:inherit}button,a,label,input,select{-webkit-tap-highlight-color:transparent}button,a,select,input[type=checkbox],input[type=range]{touch-action:manipulation}button,.primary,.secondary,.text-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:11px 20px;border:1px solid transparent;border-radius:100px;font-weight:650;font-size:14px;text-decoration:none;cursor:pointer;line-height:1.35}button{color:var(--ink);background:transparent}button:disabled{opacity:.45;cursor:not-allowed}.primary{background:var(--blue);color:white;box-shadow:0 2px 5px #1a60ce20}.primary:hover{background:var(--deep)}.secondary{border-color:#b8c9df;background:white;color:var(--blue)}.secondary:hover,.text-button:hover{background:var(--pale)}.text-button{color:var(--blue);padding:10px 14px}.inline-button{display:inline;min-height:0;padding:0;color:var(--blue);text-decoration:underline;border:0;font-size:inherit;font-weight:600;border-radius:3px}.icon-button{height:48px;width:48px;padding:0;flex:none;font-size:25px;color:var(--blue);background:#eef3fc}.button-row{display:flex;gap:10px;align-items:center}.wrap{flex-wrap:wrap}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,canvas:focus-visible{outline:3px solid #d78e1b;outline-offset:3px}[hidden]{display:none!important}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.topbar{max-width:1280px;margin:auto;padding:22px 32px;display:flex;justify-content:space-between;gap:20px;align-items:center}.brand{font-size:24px;font-weight:800;letter-spacing:-1px;text-decoration:none;color:var(--ink);display:flex;align-items:center;gap:10px}.brand-mark{width:36px;height:36px;border-radius:12px;background:var(--blue);color:white;display:inline-flex;justify-content:center;align-items:center;font-size:29px;font-weight:700;line-height:1}.brand-mark span{color:#d8efb4;margin-left:-4px}.version{font-size:11px;letter-spacing:0;font-weight:700;border:1px solid var(--line);border-radius:8px;padding:3px 6px;color:var(--muted)}.top-actions{display:flex;gap:5px}main{max-width:1280px;margin:auto;padding:0 32px 30px}.hero{display:flex;justify-content:space-between;align-items:center;padding:22px 10px 32px;gap:30px}.hero h1{font-size:clamp(30px,4.3vw,48px);line-height:1.1;letter-spacing:-1.9px;margin:15px 0 17px;font-weight:750}.hero p{max-width:590px;color:var(--muted);font-size:16px;margin:0}.eyebrow{font-size:11px;letter-spacing:.12em;font-weight:800;color:var(--blue)}.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#5e8d48;margin-right:6px}.hero-graphic{width:280px;max-width:30%;flex-shrink:0}.hero-graphic svg{width:100%;display:block}.steps{display:flex;gap:8px;padding:9px;background:#eaf0f8;border:1px solid #e2e9f4;border-radius:20px;margin-bottom:20px}.steps button{flex:1;border-radius:14px;min-height:56px;padding:10px 12px;gap:10px;font-size:13px;color:var(--muted)}.steps button span{width:25px;height:25px;display:grid;place-items:center;border-radius:50%;background:#dce5f1;font-size:12px}.steps button[aria-current=step]{background:white;color:var(--blue);box-shadow:0 2px 10px #213c6710}.steps button[aria-current=step] span{background:var(--blue);color:white}.step-panel{background:white;border:1px solid var(--line);border-radius:var(--radius);padding:32px;box-shadow:var(--shadow)}.section-top{display:flex;justify-content:space-between;align-items:center;gap:22px;margin-bottom:25px}.section-top h2{margin:6px 0 8px;font-size:clamp(22px,2.5vw,28px);line-height:1.2;letter-spacing:-.7px}.section-top h2:focus{outline:none}.muted{color:var(--muted);font-size:14px;margin:0}p{margin:8px 0}h3{font-size:16px;line-height:1.3;margin:0 0 12px}a{color:var(--blue)}.garments{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:8px 0 28px}.garment-card{position:relative;display:flex;flex-direction:column;align-items:flex-start;text-align:left;border:1px solid var(--line);border-radius:20px;background:#fcfdff;padding:22px;gap:0;min-height:190px}.garment-card:hover{border-color:#7e9ed0}.garment-card[aria-pressed=true]{background:#eef4ff;border-color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}.garment-card[aria-pressed=true]:after{content:'✓';position:absolute;right:14px;top:14px;background:var(--blue);color:white;border-radius:50%;font-size:11px;width:21px;height:21px;display:grid;place-items:center}.garment-card svg{height:62px;width:62px;margin-bottom:20px;color:var(--blue)}.garment-name{font-size:17px;font-weight:700}.garment-description{font-weight:400;font-size:12px;color:var(--muted);margin-top:3px}.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.mini-card{padding:19px;background:#f7f9fc;border-radius:17px}.mini-card h3{margin:10px 0 5px;font-size:14px}.mini-card p{font-size:13px;color:var(--muted);margin:0}.mini-icon{font-size:11px;letter-spacing:.05em;color:var(--blue);font-weight:750}.panel-footer{display:flex;justify-content:space-between;align-items:center;gap:15px;border-top:1px solid var(--line);padding-top:22px;margin-top:28px}.privacy-label{font-size:12px;color:var(--green)}.two-columns{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}.surface{background:#f8fafd;border:1px solid var(--line);border-radius:19px;padding:22px}.field{font-size:14px;font-weight:650;display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin:15px 0 7px}.field:first-child{margin-top:0}.field span{font-size:12px;color:var(--muted);font-weight:500}.field.small{font-size:12px}input[type=number],input[type=text],select{border:1px solid #b7c8de;border-radius:12px;padding:11px 13px;min-height:48px;width:100%;background:white;color:var(--ink);font-size:16px}input[type=range]{accent-color:var(--blue);width:100%;min-height:32px}input[type=checkbox]{accent-color:var(--blue);min-width:19px;width:19px;height:19px;margin:2px 0 0;flex:none}.check-label{font-size:13px;display:flex;align-items:flex-start;gap:10px;cursor:pointer;min-height:44px;padding:10px 0;line-height:1.5}.confirmation{margin-top:14px;padding-top:16px;border-top:1px solid var(--line)}.hint{font-size:12px;color:var(--muted);line-height:1.6;margin:8px 0}.strong{font-weight:650}.soft-note{background:var(--pale);border-radius:13px;padding:16px;margin:24px 0 13px;font-size:13px}.soft-note p{margin-bottom:0}.instruction-list{padding-left:23px;font-size:14px;color:var(--muted)}.instruction-list li{padding:0 0 12px 4px}.notice{background:var(--amber);border:1px solid #eadebb;border-radius:16px;padding:18px;font-size:13px;line-height:1.6;color:#685623}.notice.compact{padding:13px;font-size:12px}.pill{display:inline-flex;align-items:center;justify-content:center;min-height:28px;background:var(--pale);color:var(--blue);border-radius:30px;padding:5px 11px;font-size:11px;font-weight:700}.banner{border-radius:13px;padding:14px 18px;margin:0 0 15px;font-size:13px}.demo-banner{background:var(--amber);border:1px solid #eadebb}.demo-banner button{margin-left:8px}.segmented{display:flex;gap:4px;background:#edf2fa;border-radius:100px;padding:5px;width:fit-content;margin-bottom:22px}.segmented button{min-width:140px;min-height:43px;padding:8px 16px;font-size:13px;color:var(--muted)}.segmented button[aria-pressed=true]{background:white;color:var(--blue);box-shadow:0 1px 6px #1c416318}.file-button{cursor:pointer;position:relative}.file-button input{position:absolute;width:1px;height:1px;opacity:0}.file-button:focus-within{outline:3px solid #d78e1b;outline-offset:3px}.capture-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(275px,1fr);gap:22px;align-items:start}.capture-main{min-width:0}.capture-toolbar{display:flex;gap:10px;justify-content:space-between;align-items:center;margin-bottom:10px}.capture-toolbar select{font-size:12px;min-height:40px;padding:8px 30px 8px 10px;width:auto;max-width:170px}.capture-toolbar .text-button{font-size:12px;min-height:40px;padding:8px}.stage{position:relative;background:#eaf0f7;overflow:hidden;border:1px solid #d7e1ee;border-radius:20px;height:min(65vh,650px);min-height:300px;display:flex;align-items:center;justify-content:center}.empty{text-align:center;padding:30px;color:var(--muted);font-size:13px}.empty svg{width:110px;height:128px;margin:0 auto 20px;display:block}.empty h3{color:var(--ink);font-size:18px;margin-bottom:8px}.live-video{width:100%;height:100%;object-fit:contain;position:absolute;inset:0;background:#183246}.live-overlay{position:absolute;pointer-events:none}.photo-canvas{max-height:100%;max-width:100%;height:auto;width:auto;display:block;touch-action:none;cursor:crosshair}.loupe{position:absolute;right:12px;top:12px;width:130px;height:130px;border:3px solid white;border-radius:16px;box-shadow:0 3px 15px #17335155;pointer-events:none;background:white}.capture-action{position:absolute;bottom:18px;left:0;right:0;display:flex;justify-content:center;pointer-events:none}.shutter{background:white;color:#183c6b;box-shadow:0 3px 14px #132d3d40;pointer-events:auto;padding:13px 24px;min-height:55px}.shutter span{font-size:24px;line-height:1;color:#1a60ce}.camera-status{font-size:13px;min-height:26px;color:var(--blue);padding:7px 0}.camera-status.error{color:#a3322f}.point-toolbar{padding:12px 0 3px}.point-selector{display:flex;gap:8px;align-items:center}.point-selector select{font-size:13px;min-width:0;flex:1}.point-toolbar .hint{min-height:22px}.capture-side{display:flex;flex-direction:column;gap:16px}.full{width:100%}.capture-side .surface{padding:20px}.pose-checks{display:flex;flex-wrap:wrap;gap:7px;margin:13px 0 0}.check-chip{font-size:10px;background:#e7edf5;padding:5px 8px;border-radius:7px;color:var(--muted)}.check-chip.ok{background:var(--green-bg);color:var(--green)}.photo-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:12px}.photo-row strong{white-space:nowrap;color:var(--blue);font-size:14px}.measurement-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}.measurement-field .field{margin-top:8px;font-size:12px}.measurement-field p{font-size:11px}.source-link{font-size:12px;font-weight:650;display:inline-block;margin:5px 0 10px}details{border-top:1px solid var(--line);padding-top:14px;margin-top:16px}summary{font-size:13px;font-weight:650;cursor:pointer;min-height:30px}.table-scroll{overflow-x:auto;margin-top:12px}table{border-collapse:collapse;width:100%;font-size:12px;white-space:nowrap}th,td{padding:9px;border-bottom:1px solid var(--line);text-align:left}th{font-weight:700;background:#eaf0fa}.result-layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:22px;margin-bottom:20px}.recommendation{padding:30px;border-radius:22px;background:#edf3ff;border:1px solid #c9d9f3}.recommendation.ready{background:#eaf3e5;border-color:#d0e0c6}.result-kicker{font-size:11px;letter-spacing:.09em;font-weight:750;color:#527241}.result-size{font-size:64px;line-height:1.15;letter-spacing:-3px;color:#2f5032;font-weight:750;margin:9px 0 12px}.result-size.waiting{font-size:28px;letter-spacing:-.5px;color:var(--ink)}.result-subtitle{font-size:14px;margin:0;color:var(--ink)}.result-note{font-size:12px;color:var(--muted);margin-top:16px}.evidence-chip{display:inline-flex;border:1px solid #d4dfec;background:white;border-radius:9px;padding:6px 9px;margin:0 6px 7px 0;font-size:12px}.evidence-list{font-size:12px;padding-left:18px;color:var(--muted)}.evidence-list li{margin-bottom:7px}.export-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:24px}footer{display:flex;justify-content:space-between;gap:15px;color:var(--muted);font-size:11px;margin-top:20px;padding:0 8px}dialog{border:1px solid var(--line);border-radius:24px;padding:27px;max-width:690px;width:calc(100% - 32px);max-height:85vh;color:var(--ink);font-size:14px;box-shadow:0 15px 70px #1c3c6630}dialog::backdrop{background:#10233e66;backdrop-filter:blur(3px)}.dialog-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.dialog-top h2{font-size:22px;margin:0}.source-item{padding:13px 0;border-bottom:1px solid var(--line)}.source-item a{font-size:13px;font-weight:650}.source-item p{font-size:12px;color:var(--muted);margin:4px 0}.print-area{display:none}@media(max-width:1000px){.step-panel{padding:24px}.garment-card{padding:18px}.capture-layout{grid-template-columns:minmax(0,1.2fr) minmax(260px,1fr)}.section-top{align-items:flex-start}.section-top>.button-row{flex-wrap:wrap;justify-content:flex-end}}@media(max-width:760px){.topbar{padding:15px 18px}.top-actions{gap:0}.top-actions button{font-size:11px;padding:8px;min-height:44px}.brand{font-size:21px;gap:7px}.brand-mark{width:30px;height:32px;font-size:26px}.version{display:none}main{padding:0 15px 24px}.hero{padding:12px 3px 24px;gap:10px}.hero h1{font-size:33px;letter-spacing:-1.2px}.hero p{font-size:13px;max-width:430px}.hero-graphic{display:none}.eyebrow{font-size:10px}.steps{gap:0;padding:5px;border-radius:16px;margin-bottom:15px}.steps button{font-size:9px;padding:8px 3px;gap:5px;flex-direction:column;min-height:62px;border-radius:12px}.steps button span{width:23px;height:23px;font-size:11px}.step-panel{padding:21px 17px;border-radius:20px}.section-top{flex-direction:column;gap:13px;margin-bottom:20px}.section-top h2{font-size:24px}.muted{font-size:13px}.garments{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}.garment-card{padding:16px;min-height:155px;border-radius:16px}.garment-card svg{width:49px;height:49px;margin-bottom:13px}.garment-name{font-size:16px}.garment-description{font-size:11px}.info-grid{grid-template-columns:1fr;gap:9px}.mini-card{padding:15px 16px;position:relative;padding-left:52px}.mini-icon{position:absolute;left:16px;top:17px}.mini-card h3{margin:0 0 3px;font-size:13px}.mini-card p{font-size:12px}.panel-footer{margin-top:22px;padding-top:18px;gap:10px}.panel-footer .privacy-label{max-width:140px;font-size:10px}.panel-footer .button-row{flex-wrap:wrap;justify-content:flex-end;gap:5px}.two-columns,.result-layout{grid-template-columns:1fr;gap:14px}.surface{padding:18px;border-radius:16px}.instruction-list{font-size:13px}.capture-layout{grid-template-columns:1fr;gap:15px}.capture-side{display:grid;grid-template-columns:1fr;gap:12px}.capture-panel{padding:20px 13px}.capture-panel .section-top>.button-row{justify-content:flex-start;width:100%}.capture-panel .section-top>.button-row>*{flex:1;padding:12px;font-size:12px}.segmented{width:100%;margin-bottom:16px}.segmented button{min-width:0;flex:1;padding:8px 12px;font-size:12px}.stage{height:55vh;min-height:300px;border-radius:16px}.capture-toolbar{gap:8px}.capture-toolbar .pill{font-size:9px;max-width:140px}.capture-toolbar select{font-size:10px;max-width:135px}.capture-toolbar .button-row{gap:2px}.capture-toolbar .text-button{font-size:10px;padding:5px}.camera-status{font-size:12px}.capture-main>.button-row .secondary,.capture-main>.button-row .text-button{font-size:11px;padding:10px}.point-selector{gap:5px}.point-selector .icon-button{width:40px}.point-selector select{font-size:12px;padding:10px}.loupe{width:110px;height:110px}.measurement-fields{gap:7px 12px}.export-actions{gap:9px}.export-actions>*{width:100%}.recommendation{padding:25px}.result-size{font-size:58px}footer{flex-direction:column;gap:3px;font-size:10px}.banner{padding:12px 14px;font-size:12px}.demo-banner button{margin-left:0;margin-top:4px}.field{font-size:13px}}@media(prefers-reduced-motion:no-preference){button,a{transition:background .14s,border-color .14s}.step-panel{animation:appear .2s ease-out}@keyframes appear{from{opacity:.5;transform:translateY(3px)}to{opacity:1;transform:none}}}@media print{body{background:white;font-size:11pt}.topbar,#app,dialog{display:none!important}.print-area{display:block;max-width:180mm;margin:0 auto;color:#172b4d}.print-area h1{font-size:24pt}.print-area h2{font-size:15pt;margin-top:24pt}.print-area p,.print-area li{font-size:10pt}.print-area pre{white-space:pre-wrap;font:10pt/1.5 system-ui}.print-area .notice{break-inside:avoid}}
+
+</style>
+</head>
+<body>
+<header class="topbar"><a class="brand" href="#" aria-label="TallaLab, inicio"><span class="brand-mark" aria-hidden="true">t<span>l</span></span>TallaLab <span class="version">2.0</span></a><div class="top-actions"><button id="sourcesButton" class="text-button">Fuentes y tablas</button><button id="newSession" class="text-button">Nueva medición</button></div></header>
+<main id="app">
+<section class="hero"><div><div class="eyebrow"><span class="live-dot"></span> UNIFORMES ESCOLARES · GUÍA VISUAL</div><h1>Un buen ajuste<br>empieza por medir bien.</h1><p>Cámara guiada, medidas que puedes revisar y una talla de referencia con su fuente. Todo en cinco pasos.</p></div><div class="hero-graphic" aria-hidden="true"><svg viewBox="0 0 260 190" fill="none"><rect x="34" y="9" width="140" height="172" rx="25" fill="#dbe8ff"/><rect x="47" y="21" width="114" height="146" rx="17" stroke="#547ec7" stroke-width="1.5" stroke-dasharray="5 5"/><circle cx="104" cy="53" r="13" fill="#406db4"/><path d="M77 85 61 118m70-33 16 33M77 85l13-10h28l13 10-10 47 8 29m-38-29-8 29m8-29h30" stroke="#406db4" stroke-width="10" stroke-linecap="round"/><path d="M71 91h67M83 121h43" stroke="#d8ffb7" stroke-width="3"/><rect x="147" y="45" width="99" height="45" rx="15" fill="white"/><circle cx="167" cy="67" r="10" fill="#e4f3dd"/><path d="m162 67 4 4 6-7" stroke="#377045" stroke-width="2"/><path d="M185 62h43m-43 10h30" stroke="#a7bbd8" stroke-width="5" stroke-linecap="round"/><rect x="6" y="126" width="82" height="43" rx="14" fill="#d8efcb"/><path d="M22 144h47m-47 10h31" stroke="#6a935c" stroke-width="4" stroke-linecap="round"/></svg></div></section>
+<div id="demoBanner" class="banner demo-banner" hidden><strong>Modo ejemplo.</strong> Todos los datos son ficticios. <button id="exitDemo" class="inline-button">Empezar con datos reales</button></div>
+<nav id="steps" class="steps" aria-label="Pasos de la medición"><button data-step="1" aria-current="step"><span>1</span>Prenda</button><button data-step="2"><span>2</span>Preparación</button><button data-step="3"><span>3</span>Cámara</button><button data-step="4"><span>4</span>Verificación</button><button data-step="5"><span>5</span>Resultado</button></nav>
+<div id="globalStatus" class="sr-only" role="status" aria-live="polite"></div>
+
+<section id="step1" class="step-panel" aria-labelledby="title1"><div class="section-top"><div><span class="eyebrow">PASO 1 DE 5</span><h2 id="title1" tabindex="-1">¿Qué prenda vamos a revisar?</h2><p class="muted">Cada prenda necesita medidas diferentes. La edad por sí sola no determina la talla.</p></div><button id="demoButton" class="secondary">Ver un ejemplo</button></div><div id="garments" class="garments" role="group" aria-label="Elegir prenda"></div><div class="info-grid"><div class="mini-card"><span class="mini-icon">01</span><h3>Encuadra con ayuda</h3><p>Una silueta ajustable orienta la postura. El asistente de Google es opcional.</p></div><div class="mini-card"><span class="mini-icon">02</span><h3>Verifica lo importante</h3><p>Los contornos se introducen con cinta. La foto estima solo distancias visibles.</p></div><div class="mini-card"><span class="mini-icon">03</span><h3>Conoce la referencia</h3><p>Consulta la tabla utilizada y revisa el ajuste antes de encargar el uniforme.</p></div></div><div class="panel-footer"><span class="privacy-label">✓ Fotos procesadas en tu dispositivo</span><button class="primary" data-next>Continuar <span aria-hidden="true">→</span></button></div></section>
+
+<section id="step2" class="step-panel" hidden aria-labelledby="title2"><div class="section-top"><div><span class="eyebrow">PASO 2 DE 5</span><h2 id="title2" tabindex="-1">Preparemos una buena medición</h2><p class="muted" id="prepSubtitle"></p></div><span id="selectedGarment" class="pill"></span></div><div class="two-columns"><div class="surface"><div id="bodyCalibration"><label class="field" for="height">Estatura real, sin zapatos <span>cm</span></label><input id="height" type="number" inputmode="decimal" min="60" max="220" step="0.1" placeholder="Ej. 140"><p class="hint">Mídela de pie. Esta cifra calibra la foto; la cámara no conoce la estatura.</p></div><div id="footCalibration" hidden><label class="field" for="reference">Longitud de la referencia física <span>cm</span></label><input id="reference" type="number" inputmode="decimal" min="5" max="40" step="0.1" value="20"><p class="hint">Dibuja un segmento de 20 cm comprobado con regla junto al pie. Ambos extremos y el pie deben aparecer sobre el mismo suelo plano.</p></div><div class="soft-note"><strong>Para elegir talla también necesitarás</strong><p id="neededMeasures"></p></div><p class="hint">Puedes completar el recorrido solo con medidas tomadas con cinta, aunque no uses la cámara.</p></div><div class="surface"><h3>Antes de capturar</h3><ol id="prepList" class="instruction-list"></ol><div class="notice compact">Prototipo de pruebas: sin precisión validada ni margen de error conocido. Confirma con cinta y prueba la prenda.</div></div></div><div class="panel-footer"><button class="secondary" data-back>← Atrás</button><div class="button-row"><button id="skipCamera" class="text-button">Usar solo cinta</button><button class="primary" data-next>Abrir guía de cámara →</button></div></div></section>
+
+<section id="step3" class="step-panel capture-panel" hidden aria-labelledby="title3"><div class="section-top"><div><span class="eyebrow">PASO 3 DE 5</span><h2 id="title3" tabindex="-1">Encuadra. Captura. Revisa.</h2><p class="muted" id="captureSubtitle">Las guías ayudan al encuadre; no representan una talla predeterminada.</p></div><div class="button-row"><button id="startCamera" class="primary">Activar cámara</button><label class="secondary file-button">Cargar foto<input id="photoInput" type="file" accept="image/*" aria-label="Cargar foto para la vista seleccionada"></label></div></div><div id="viewTabs" class="segmented" role="group" aria-label="Vista de captura"></div><div class="capture-layout"><div class="capture-main"><div class="capture-toolbar"><span id="captureMode" class="pill">Sin captura</span><div class="button-row"><label class="sr-only" for="facing">Cámara</label><select id="facing"><option value="environment">Cámara trasera</option><option value="user">Cámara frontal</option></select><button id="stopCamera" class="text-button" hidden>Cerrar cámara</button></div></div><div id="pointToolbar" class="point-toolbar" hidden><div class="point-selector"><button id="previousPoint" class="icon-button" aria-label="Punto anterior">‹</button><label class="sr-only" for="photoPoint">Punto a marcar</label><select id="photoPoint"></select><button id="nextPoint" class="icon-button" aria-label="Punto siguiente">›</button></div><p id="pointInstruction" class="hint" aria-live="polite"></p></div><div id="stage" class="stage"><div id="empty" class="empty"><svg viewBox="0 0 120 140" fill="none" aria-hidden="true"><path d="M28 15H15v20m77-20h13v20M15 105v20h13m77-20v20H92" stroke="#6481a8" stroke-width="3" stroke-linecap="round"/><circle cx="60" cy="37" r="12" stroke="#6481a8" stroke-width="3"/><path d="m40 76 6-20h28l6 20M48 58v35l-5 22m29-57v35l5 22" stroke="#6481a8" stroke-width="4" stroke-linecap="round"/></svg><h3>La guía está lista</h3><p>Activa la cámara o carga una foto.<br>También puedes continuar con cinta.</p></div><video id="video" class="live-video" autoplay playsinline muted hidden aria-label="Vista de cámara"></video><canvas id="liveOverlay" class="live-overlay" hidden aria-hidden="true"></canvas><canvas id="canvas" class="photo-canvas" hidden tabindex="0" aria-label="Foto para marcar puntos. Enter coloca un punto; las flechas lo mueven, Mayús permite movimientos mayores."></canvas><canvas id="loupe" class="loupe" width="150" height="150" hidden aria-label="Detalle ampliado del punto"></canvas><div id="captureAction" class="capture-action" hidden><button id="capture" class="shutter" disabled><span aria-hidden="true">●</span> Tomar foto</button></div></div><p id="cameraStatus" class="camera-status" role="status" aria-live="polite">Selecciona una vista para empezar.</p><div class="button-row wrap"><button id="undoPoint" class="secondary" disabled>Deshacer punto</button><button id="resetPoints" class="text-button" disabled>Reiniciar puntos</button><label class="check-label"><input id="showLoupe" type="checkbox" checked>Lupa al marcar</label></div><p class="hint">Toca un punto dibujado para seleccionarlo y arrástralo para corregirlo. Teclado: flechas; Mayús para mover más. La cabeza y el suelo siempre se revisan manualmente.</p></div><aside class="capture-side"><div class="surface"><h3>Guía sobre la cámara</h3><label class="check-label"><input id="showGuide" type="checkbox" checked>Mostrar silueta de encuadre</label><label class="field small" for="guideWidth">Ancho de la guía</label><input id="guideWidth" type="range" min="40" max="85" value="58"><p class="hint">Ajusta la ayuda visual al encuadre. Esto no calibra las medidas.</p><button id="assistButton" class="secondary full">Activar asistente de Google</button><p id="assistStatus" class="hint" role="status">Opcional. Descarga inicial del modelo; ejecución en este dispositivo.</p><div id="poseChecks" class="pose-checks" hidden></div></div><div class="surface"><h3>Estimaciones de esta foto</h3><div id="photoResults" class="photo-results"><p class="hint">Aparecerán al calibrar y marcar los puntos.</p></div><div id="photoWarnings" class="hint"></div><p class="hint strong">Un ancho visible no es un contorno corporal. No se convierte automáticamente en talla.</p></div></aside></div><div class="panel-footer"><button class="secondary" data-back>← Atrás</button><button class="primary" data-next>Verificar medidas →</button></div></section>
+
+<section id="step4" class="step-panel" hidden aria-labelledby="title4"><div class="section-top"><div><span class="eyebrow">PASO 4 DE 5</span><h2 id="title4" tabindex="-1">Verifica las medidas que deciden la talla</h2><p class="muted">Introduce medidas del cuerpo. La ropa terminada incorpora su propia holgura.</p></div></div><div class="two-columns"><div class="surface"><h3 id="measurementHeading">Medidas con cinta</h3><div id="measurementFields" class="measurement-fields"></div><label class="check-label confirmation"><input id="confirmed" type="checkbox">He comprobado estas medidas con cinta o regla, sin apretar.</label></div><div class="surface"><h3>Selecciona la tabla</h3><label class="field" for="catalog">Referencia para esta prueba</label><select id="catalog"></select><p id="catalogNote" class="hint"></p><a id="catalogSource" class="source-link" target="_blank" rel="noopener noreferrer">Consultar fuente ↗</a><label class="check-label confirmation"><input id="referenceAccepted" type="checkbox"><span id="referenceAcceptanceLabel">Entiendo que esta referencia puede diferir de la del proveedor de mi colegio.</span></label><details><summary>Usar la tabla de mi proveedor</summary><p class="hint">Importa un CSV de medidas corporales de referencia en cm. Para zapatos, usa longitud real del pie, no longitud de la suela. Las medidas de prenda terminada requieren otra interpretación.</p><label class="field" for="supplierName">Nombre del proveedor</label><input id="supplierName" type="text" maxlength="80" placeholder="Ej. Uniformes del colegio"><div class="button-row wrap"><label class="secondary file-button">Importar CSV<input id="csvInput" type="file" accept=".csv,text/csv" aria-label="Importar tabla de tallas CSV"></label><button id="csvTemplate" class="text-button">Plantilla CSV</button></div><p id="csvStatus" class="hint" role="status"></p><p class="hint">Columnas: talla, pecho, cintura, cadera, pie_cm. Deja vacías las que no use esta prenda. Los decimales usan punto.</p></details><details><summary>Ver valores de la tabla</summary><div id="catalogTable" class="table-scroll"></div></details></div></div><div class="panel-footer"><button class="secondary" data-back>← Atrás</button><button class="primary" data-next>Ver talla de referencia →</button></div></section>
+
+<section id="step5" class="step-panel" hidden aria-labelledby="title5"><div class="section-top"><div><span class="eyebrow">PASO 5 DE 5</span><h2 id="title5" tabindex="-1">Una referencia clara para revisar</h2><p class="muted">El ajuste final depende del proveedor, el corte y la prueba de la prenda.</p></div><button id="editMeasures" class="secondary">Editar medidas</button></div><div class="result-layout"><div id="recommendation" class="recommendation" role="status" aria-live="polite"></div><div class="surface"><h3>Qué sustenta este resultado</h3><div id="resultEvidence"></div><p class="hint">La comparación selecciona la primera referencia nominal igual o mayor en las dimensiones necesarias. Es una regla conservadora de este prototipo; no son intervalos oficiales ni una garantía de ajuste.</p></div></div><div id="reviewWarnings" class="notice"></div><div class="export-actions"><button id="downloadReport" class="primary">Descargar informe</button><button id="printReport" class="secondary">Imprimir / guardar PDF</button><button id="measureAnother" class="text-button">Revisar otra prenda</button></div><div class="panel-footer"><button class="secondary" data-back>← Atrás</button><span class="privacy-label">Tu foto no se incluye en el informe</span></div></section>
+
+<footer><span>TallaLab 2.0 · Prototipo de pruebas</span><span>Sin precisión metrológica validada · <button class="inline-button" id="limitationsButton">Cómo interpretar los resultados</button></span></footer>
+</main>
+<dialog id="sourcesDialog"><div class="dialog-top"><h2>Referencias y límites</h2><button id="closeSources" class="icon-button" aria-label="Cerrar referencias">×</button></div><p>La superposición es una ayuda visual sobre la cámara. El asistente local estima articulaciones para orientar postura; no escanea contornos ni produce un modelo corporal exacto.</p><div class="notice compact">Las tablas incorporadas pertenecen a marcas concretas. Usa la del proveedor del colegio para tomar decisiones de compra y confirma el ajuste con la prenda.</div><div id="sourcesList"></div><p class="hint">Las fotos y los puntos permanecen en memoria. Al cerrar o reiniciar se descartan. Solo los informes que descargues quedan guardados. Los recursos del asistente se sirven desde este sitio; las imágenes no se envían a Google ni a Firebase.</p><div class="button-row wrap"><a class="secondary" href="/TallaLab.html" download="TallaLab.html">Descargar versión HTML</a><a class="text-button" href="/INVESTIGACION.md" target="_blank" rel="noopener">Investigación del proyecto ↗</a></div></dialog>
+<section id="printArea" class="print-area" aria-label="Informe para imprimir"></section>
+<script type="module">
+/** Pure measurement and size-reference functions. No images or DOM are retained. */
+const GARMENTS = new Set(['shirt', 'pants', 'skirt', 'shoes']);
+const REQUIRED = { shirt: ['chest'], pants: ['waist', 'hip'], skirt: ['waist', 'hip'], shoes: ['leftFoot', 'rightFoot'] };
+const LABELS = { chest: 'Pecho', waist: 'Cintura', hip: 'Cadera', leftFoot: 'Pie izquierdo', rightFoot: 'Pie derecho', foot: 'Pie mayor' };
+const number = value => typeof value === 'number' ? value : typeof value === 'string' && /^\s*\d+(?:\.\d+)?\s*$/.test(value) ? Number(value) : NaN;
+const supplied = value => value !== undefined && value !== null && value !== '';
+
+function requiredFieldsFor(garment) {
+  return [...(REQUIRED[garment] || [])];
+}
+
+function measurePhoto({ kind = 'body', view = 'front', points = {}, width, height, heightCm, referenceCm } = {}) {
+  const result = { measures: [], warnings: [], errors: [] };
+  const error = message => result.errors.push(message);
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+    error('La fotografía debe tener ancho y alto válidos.');
+    return result;
+  }
+  if (!points || typeof points !== 'object') {
+    error('Faltan los puntos de la fotografía.');
+    return result;
+  }
+  const checked = new Map();
+  function point(key, required = false) {
+    if (checked.has(key)) return checked.get(key);
+    const p = points[key];
+    if (!p) {
+      if (required) error(`Falta marcar el punto ${key}.`);
+      return null;
+    }
+    if (!Number.isFinite(p.x) || !Number.isFinite(p.y) || p.x < 0 || p.x > width || p.y < 0 || p.y > height) {
+      error(`El punto ${key} no está dentro de la fotografía.`);
+      checked.set(key, null);
+      return null;
+    }
+    checked.set(key, p);
+    return p;
+  }
+  const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  const add = (id, label, value) => {
+    if (!Number.isFinite(value) || value <= 0) error(`Revisa los puntos de ${label.toLowerCase()}.`);
+    else result.measures.push({ id, label, value, unit: 'cm', origin: 'photo' });
+  };
+  const finish = () => {
+    if (result.errors.length) result.measures = [];
+    return result;
+  };
+
+  if (kind === 'foot') {
+    result.warnings.push('La referencia y el pie deben estar en el mismo plano. La cámara debe estar perpendicular al suelo; no se corrige la perspectiva.');
+    result.warnings.push('La longitud es orientativa y no incluye holgura. Comprueba ambos pies y utiliza la tabla del fabricante.');
+    const reference = number(referenceCm);
+    if (!Number.isFinite(reference) || reference < 5 || reference > 40) error('La referencia física debe medir entre 5 y 40 cm.');
+    const a = point('refA', true), b = point('refB', true), heel = point('heel', true), toe = point('toe', true);
+    if (result.errors.length) return finish();
+    const referencePixels = distance(a, b);
+    if (referencePixels < width * .08) {
+      error('La referencia debe ocupar al menos el 8 % del ancho de la foto. Acerca la cámara o separa correctamente sus puntos.');
+      return finish();
+    }
+    const scale = reference / referencePixels;
+    const length = distance(heel, toe) * scale;
+    if (length < 8 || length > 35) error('La longitud del pie debe estar entre 8 y 35 cm. Revisa la referencia, el talón y el dedo más largo.');
+    else add('footLength', 'Longitud del pie', length);
+    const left = point('footL'), right = point('footR');
+    if (left && right) add('footWidth', 'Ancho del pie', distance(left, right) * scale);
+    else if (left || right) result.warnings.push('Marca ambos extremos para estimar el ancho del pie.');
+    return finish();
+  }
+
+  if (kind !== 'body' || !['front', 'side'].includes(view)) {
+    error('El tipo de captura o la vista no son compatibles.');
+    return finish();
+  }
+  result.warnings.push('La estatura introducida calibra la imagen; no se mide automáticamente. La postura, la ropa y la perspectiva alteran las estimaciones.');
+  result.warnings.push('Los anchos y profundidades de la fotografía no son contornos. No los conviertas en contornos ni los uses para elegir una talla.');
+  const stature = number(heightCm);
+  if (!Number.isFinite(stature) || stature < 60 || stature > 220) error('Introduce una estatura real entre 60 y 220 cm.');
+  const top = point('top', true), bottom = point('bottom', true);
+  if (result.errors.length) return finish();
+  const bodyPixels = bottom.y - top.y;
+  if (bodyPixels <= 0) error('La cabeza debe estar por encima del suelo.');
+  else if (bodyPixels < height * .25) error('El cuerpo debe ocupar al menos un cuarto de la altura de la fotografía.');
+  if (bodyPixels > 0 && Math.abs(bottom.x - top.x) > bodyPixels * .08) error('La cabeza y el suelo están desalineados. Mantén el cuerpo erguido y la cámara recta.');
+  if (result.errors.length) return finish();
+  const scale = stature / bodyPixels;
+  function pair(leftKey, rightKey, id, label, ordered = true) {
+    const a = point(leftKey), b = point(rightKey);
+    if (!a || !b) {
+      if (a || b) result.warnings.push(`Completa los dos puntos de ${label.toLowerCase()}.`);
+      return null;
+    }
+    if ((ordered && a.x >= b.x) || (!ordered && a.x === b.x)) error(`Revisa el orden de los extremos de ${label.toLowerCase()}.`);
+    if (Math.abs(a.y - b.y) > bodyPixels * .05) error(`Los extremos de ${label.toLowerCase()} deben estar al mismo nivel.`);
+    if (Math.min(a.y, b.y) <= top.y || Math.max(a.y, b.y) >= bottom.y) error(`Los puntos de ${label.toLowerCase()} deben quedar entre la cabeza y el suelo.`);
+    add(id, label, Math.abs(b.x - a.x) * scale);
+    return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, direction: Math.sign(b.x - a.x) };
+  }
+  if (view === 'side') {
+    const waist = pair('waistFront', 'waistBack', 'waistDepth', 'Profundidad lateral de cintura', false);
+    const hip = pair('hipFront', 'hipBack', 'hipDepth', 'Profundidad lateral de cadera', false);
+    if (waist && hip && waist.y >= hip.y) error('La cintura debe quedar por encima de la cadera.');
+    if (waist && hip && waist.direction !== hip.direction) error('Marca frente y espalda de forma consistente en la vista lateral.');
+    return finish();
+  }
+  const shoulder = pair('shoulderL', 'shoulderR', 'shoulderWidth', 'Ancho entre hombros');
+  const waist = pair('waistL', 'waistR', 'waistWidth', 'Ancho frontal de cintura');
+  const hip = pair('hipL', 'hipR', 'hipWidth', 'Ancho frontal de cadera');
+  if (shoulder && waist) {
+    if (shoulder.y >= waist.y) error('Los hombros deben quedar por encima de la cintura.');
+    else add('torsoLength', 'Largo visual del torso', (waist.y - shoulder.y) * scale);
+  }
+  if (waist && hip && waist.y >= hip.y) error('La cintura debe quedar por encima de la cadera.');
+  if (waist) add('legLength', 'Largo visual desde cintura al suelo', (bottom.y - waist.y) * scale);
+  const shoulderR = point('shoulderR'), elbow = point('elbow'), wrist = point('wrist');
+  if (shoulderR && elbow && wrist) {
+    if (!distance(shoulderR, elbow) || !distance(elbow, wrist)) error('Los puntos de hombro, codo y muñeca deben estar separados.');
+    else add('sleeveLength', 'Largo visual de manga', (distance(shoulderR, elbow) + distance(elbow, wrist)) * scale);
+  } else if (elbow || wrist) result.warnings.push('Marca hombro derecho, codo y muñeca para estimar la manga.');
+  const crotch = point('crotch');
+  if (crotch) {
+    if (crotch.y <= (waist ? waist.y : top.y) || crotch.y >= bottom.y) error('La entrepierna debe estar por debajo de la cintura y por encima del suelo.');
+    else add('inseam', 'Entrepierna visual hasta el suelo', (bottom.y - crotch.y) * scale);
+  }
+  return finish();
+}
+
+function recommendSize({ garment, measurements = {}, catalog, confirmed = false, referenceAccepted = false } = {}) {
+  const result = { status: 'invalid', size: null, required: [], warnings: [], details: [] };
+  if (!GARMENTS.has(garment)) {
+    result.warnings.push('Selecciona una prenda compatible.');
+    return result;
+  }
+  const fields = requiredFieldsFor(garment);
+  if (!measurements || typeof measurements !== 'object') measurements = {};
+  result.required = fields.filter(key => !supplied(measurements[key]));
+  const invalid = fields.filter(key => supplied(measurements[key]) && (!Number.isFinite(number(measurements[key])) || number(measurements[key]) <= 0));
+  if (invalid.length) {
+    result.warnings.push(`Revisa las medidas: ${invalid.map(key => LABELS[key]).join(', ')}.`);
+    return result;
+  }
+  if (result.required.length) {
+    result.status = 'missing';
+    result.warnings.push('Completa las medidas verificadas que necesita esta prenda. Los anchos visuales no sustituyen los contornos con cinta.');
+    return result;
+  }
+  const expectedKind = garment === 'shoes' ? 'foot' : 'body';
+  if (!catalog || catalog.kind !== expectedKind || !Array.isArray(catalog.rows) || !catalog.rows.length) {
+    result.warnings.push(catalog?.kind === 'garment' ? 'Esta tabla contiene medidas de prenda. Se necesita una tabla corporal; no se añade holgura automáticamente.' : 'Selecciona una tabla de referencias corporales o de longitud del pie compatible con la prenda.');
+    return result;
+  }
+  const dimensions = garment === 'shoes' ? ['foot'] : fields;
+  const seen = new Set();
+  for (const [index, row] of catalog.rows.entries()) {
+    const size = typeof row?.size === 'string' ? row.size.trim() : '';
+    if (!size || seen.has(size.toLocaleLowerCase('es')) || dimensions.some(key => !Number.isFinite(number(row[key])) || number(row[key]) <= 0)) {
+      result.warnings.push('La tabla contiene tallas duplicadas, etiquetas vacías o referencias inválidas.');
+      return result;
+    }
+    seen.add(size.toLocaleLowerCase('es'));
+    if (index && dimensions.some(key => number(row[key]) < number(catalog.rows[index - 1][key]))) {
+      result.warnings.push('Las referencias de la tabla deben estar ordenadas de menor a mayor en todas las medidas requeridas.');
+      return result;
+    }
+  }
+  if (confirmed !== true || referenceAccepted !== true) {
+    result.status = 'missing';
+    if (confirmed !== true) result.warnings.push('Confirma las medidas con cinta o regla antes de obtener una sugerencia.');
+    if (referenceAccepted !== true) result.warnings.push('Confirma que esta tabla corresponde al proveedor y al corte que vas a probar.');
+    return result;
+  }
+  const input = Object.fromEntries(fields.map(key => [key, number(measurements[key])]));
+  if (garment === 'shoes') {
+    input.foot = Math.max(input.leftFoot, input.rightFoot);
+    result.details.push(`Se compara el pie mayor: ${input.foot} cm. No se añade holgura automáticamente.`);
+    result.warnings.push('La talla depende de la horma y del fabricante. Confirma el ajuste probando ambos zapatos.');
+  } else result.warnings.push('Sugerencia para probar según referencias corporales nominales. No son límites máximos publicados ni una garantía de ajuste.');
+  const minima = dimensions.map(key => Math.min(...catalog.rows.map(row => number(row[key]))));
+  const belowAll = dimensions.every((key, index) => input[key] < minima[index]);
+  const candidates = dimensions.map(key => ({ key, row: catalog.rows.find(row => number(row[key]) >= input[key]) }));
+  for (const { key, row } of candidates) {
+    result.details.push(`${LABELS[key]}: ${input[key]} cm; ${row ? `primera referencia igual o superior: talla ${row.size} (${number(row[key])} cm).` : 'supera las referencias disponibles.'}`);
+  }
+  const selected = catalog.rows.find(row => dimensions.every(key => number(row[key]) >= input[key]));
+  if (belowAll || !selected) {
+    result.status = 'outside';
+    result.warnings.push(belowAll ? 'Las medidas quedan por debajo de la menor referencia de la tabla. No se extrapola una talla.' : 'Las medidas exceden las referencias disponibles. Solicita una tabla ampliada o revisión presencial.');
+    return result;
+  }
+  if (new Set(candidates.filter(item => item.row).map(item => item.row.size)).size > 1) result.warnings.push('Las medidas corresponden a referencias de tallas distintas. Revisa especialmente cintura y cadera y prueba la prenda.');
+  result.status = 'ready';
+  result.size = selected.size.trim();
+  result.details.push(`Referencia seleccionada: talla ${result.size}; ${dimensions.map(key => `${LABELS[key].toLowerCase()} ${number(selected[key])} cm`).join(', ')}.`);
+  return result;
+}
+
+function splitCsv(text, delimiter) {
+  const rows = [], row = [];
+  let value = '', quoted = false, afterQuote = false;
+  function field() { row.push(value.trim()); value = ''; afterQuote = false; }
+  function endRow() { field(); if (row.some(cell => cell !== '')) rows.push([...row]); row.length = 0; }
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    if (quoted) {
+      if (char === '"') {
+        if (text[i + 1] === '"') { value += '"'; i++; }
+        else { quoted = false; afterQuote = true; }
+      } else value += char;
+    } else if (char === delimiter) field();
+    else if (char === '\r' || char === '\n') {
+      if (char === '\r' && text[i + 1] === '\n') i++;
+      endRow();
+    } else if (char === '"') {
+      if (value.trim() || afterQuote) throw new Error('El CSV contiene comillas mal colocadas.');
+      value = ''; quoted = true;
+    } else if (afterQuote && !/\s/.test(char)) throw new Error('Hay texto después del cierre de una celda entre comillas.');
+    else if (!afterQuote) value += char;
+  }
+  if (quoted) throw new Error('El CSV contiene una celda con comillas sin cerrar.');
+  if (value || row.length || afterQuote) endRow();
+  return rows;
+}
+
+function parseCatalogCsv(text, { name = 'Tabla importada', garment } = {}) {
+  if (!GARMENTS.has(garment)) throw new Error('Selecciona una prenda válida antes de importar la tabla.');
+  if (typeof text !== 'string' || !text.trim()) throw new Error('El archivo CSV está vacío.');
+  if (text.length > 250000) throw new Error('La tabla CSV es demasiado grande.');
+  const clean = text.replace(/^\uFEFF/, '');
+  const firstLine = clean.split(/\r?\n/, 1)[0];
+  const delimiter = firstLine.includes(';') ? ';' : ',';
+  const rows = splitCsv(clean, delimiter);
+  if (rows.length < 2) throw new Error('El CSV debe incluir cabecera y al menos una talla.');
+  const headers = rows.shift().map(value => value.toLocaleLowerCase('es'));
+  const expected = ['talla', 'pecho', 'cintura', 'cadera', 'pie_cm'];
+  if (new Set(headers).size !== headers.length || headers.length !== expected.length || expected.some(header => !headers.includes(header))) throw new Error('Usa la cabecera talla,pecho,cintura,cadera,pie_cm (también admite punto y coma).');
+  const mapping = { pecho: 'chest', cintura: 'waist', cadera: 'hip', pie_cm: 'foot' };
+  const required = garment === 'shoes' ? ['foot'] : requiredFieldsFor(garment);
+  const seen = new Set();
+  const parsed = rows.map((cells, index) => {
+    const line = index + 2;
+    if (cells.length !== headers.length) throw new Error(`La fila ${line} no tiene cinco columnas. Usa punto para los decimales.`);
+    const data = Object.fromEntries(headers.map((header, i) => [header, cells[i]]));
+    const size = data.talla.trim();
+    if (!size || size.length > 60 || /[\r\n\u0000-\u001f]/.test(size)) throw new Error(`La fila ${line} tiene una etiqueta de talla inválida.`);
+    const key = size.toLocaleLowerCase('es');
+    if (seen.has(key)) throw new Error(`La talla ${size} está duplicada.`);
+    seen.add(key);
+    const row = { size };
+    for (const [column, field] of Object.entries(mapping)) {
+      if (!data[column]) {
+        if (required.includes(field)) throw new Error(`Falta ${column} en la fila ${line}.`);
+        continue;
+      }
+      if (!/^\d+(?:\.\d+)?$/.test(data[column]) || !Number.isFinite(Number(data[column])) || Number(data[column]) <= 0) throw new Error(`Valor inválido de ${column} en la fila ${line}; utiliza centímetros y decimales con punto.`);
+      row[field] = Number(data[column]);
+    }
+    return row;
+  });
+  for (let i = 1; i < parsed.length; i++) {
+    if (required.some(field => parsed[i][field] < parsed[i - 1][field])) throw new Error('Ordena las tallas de menor a mayor en todas las medidas requeridas.');
+  }
+  return { name: String(name || 'Tabla importada'), garment, kind: garment === 'shoes' ? 'foot' : 'body', rows: parsed };
+}
+
+// Referencias comerciales verificadas. Las cifras son nominales, no intervalos.
+const CATALOGS = [
+  {
+    id: 'eci-nino',
+    name: 'Uniformes · ECI niño',
+    kind: 'body',
+    source: 'https://www.elcorteingles.es/moda-infantil/tallas-uniformes/',
+    date: '2026-10-28',
+    note: 'Referencia comercial para pruebas. Medidas corporales nominales; no es tabla del proveedor del colegio. No incluye estatura ni largos.',
+    rows: [
+      { size: '2', chest: 52, waist: 49, hip: 56 },
+      { size: '3', chest: 54, waist: 51, hip: 58 },
+      { size: '4', chest: 56, waist: 53, hip: 61 },
+      { size: '6', chest: 60, waist: 57, hip: 66 },
+      { size: '8', chest: 64, waist: 61, hip: 71 },
+      { size: '10', chest: 68, waist: 65, hip: 76 },
+      { size: '12', chest: 74, waist: 69, hip: 81 },
+      { size: '14', chest: 80, waist: 73, hip: 86 },
+      { size: '16', chest: 86, waist: 77, hip: 91 },
+      { size: '18', chest: 90, waist: 81, hip: 95 },
+    ],
+  },
+  {
+    id: 'eci-nina',
+    name: 'Uniformes · ECI niña',
+    kind: 'body',
+    source: 'https://www.elcorteingles.es/moda-infantil/tallas-uniformes/',
+    date: '2026-10-28',
+    note: 'Referencia comercial para pruebas. Medidas corporales nominales; no es tabla del proveedor del colegio. No incluye estatura ni largos.',
+    rows: [
+      { size: '2', chest: 52, waist: 49, hip: 56 },
+      { size: '3', chest: 54, waist: 51, hip: 58 },
+      { size: '4', chest: 56, waist: 52, hip: 61 },
+      { size: '6', chest: 60, waist: 55, hip: 66 },
+      { size: '8', chest: 64, waist: 58, hip: 71 },
+      { size: '10', chest: 68, waist: 62, hip: 76 },
+      { size: '12', chest: 74, waist: 66, hip: 81 },
+      { size: '14', chest: 80, waist: 70, hip: 86 },
+      { size: '16', chest: 86, waist: 74, hip: 91 },
+      { size: '18', chest: 90, waist: 78, hip: 95 },
+    ],
+  },
+  {
+    id: 'clarks-kids',
+    name: 'Zapatos · Clarks infantil EU',
+    kind: 'foot',
+    source: 'https://www.clarks.com/en-gb/fitguide',
+    date: '2026-10-28',
+    note: 'Referencia Clarks UK: talla Clarks EU y largo del pie. Milímetros convertidos a centímetros. Medir ambos pies y usar el mayor; comprobar ancho y ajuste.',
+    rows: [
+      { size: '25', foot: 14.7 },
+      { size: '25.5', foot: 15.1 },
+      { size: '26', foot: 15.5 },
+      { size: '27', foot: 15.9 },
+      { size: '27.5', foot: 16.4 },
+      { size: '28', foot: 16.8 },
+      { size: '28.5', foot: 17.2 },
+      { size: '29', foot: 17.6 },
+      { size: '29.5', foot: 18.1 },
+      { size: '30', foot: 18.5 },
+      { size: '31', foot: 18.9 },
+      { size: '32', foot: 19.3 },
+      { size: '32.5', foot: 19.8 },
+      { size: '33', foot: 20.2 },
+      { size: '33.5', foot: 20.6 },
+      { size: '34', foot: 21.0 },
+      { size: '35', foot: 21.4 },
+      { size: '35.5', foot: 21.9 },
+      { size: '36', foot: 22.3 },
+      { size: '37', foot: 22.7 },
+      { size: '37.5', foot: 23.1 },
+      { size: '38', foot: 23.6 },
+      { size: '39', foot: 24.0 },
+      { size: '39.5', foot: 24.4 },
+      { size: '40', foot: 24.9 },
+    ],
+  },
+];
+
+const SOURCES = [
+  {
+    title: 'El Corte Inglés · tallas de uniformes',
+    url: 'https://www.elcorteingles.es/moda-infantil/tallas-uniformes/',
+    description: 'Tablas corporales nominales de pecho, cintura y cadera para uniformes. Referencia comercial de demostración.',
+  },
+  {
+    title: 'Clarks UK · calzado infantil',
+    url: 'https://www.clarks.com/en-gb/fitguide',
+    description: 'Correspondencia propia entre largo del pie y talla Clarks EU; medir ambos pies y comprobar el ancho.',
+  },
+  {
+    title: 'Google · MediaPipe Pose Landmarker para web',
+    url: 'https://developers.google.com/edge/mediapipe/solutions/vision/pose_landmarker/web_js',
+    description: 'Detección de puntos corporales para orientar el encuadre. Sus coordenadas no certifican medidas de confección.',
+  },
+  {
+    title: 'ISO 8559-1:2017 · medición corporal',
+    url: 'https://www.iso.org/standard/61686.html',
+    description: 'Definiciones antropométricas para ropa; no ofrece una tabla universal de tallas ni valida esta aplicación.',
+  },
+  {
+    title: 'ISO 8559-2:2025 · designación de tallas',
+    url: 'https://www.iso.org/standard/85590.html',
+    description: 'Indicadores principales y secundarios basados en medidas corporales. Sustituye la edición de 2017.',
+  },
+  {
+    title: 'Google · accesibilidad y objetivos táctiles Material',
+    url: 'https://support.google.com/accessibility/android/answer/7101858?hl=es',
+    description: 'Controles suficientemente grandes y separados para facilitar la interacción táctil.',
+  },
+  {
+    title: 'Nike Colombia · cómo medir ambos pies',
+    url: 'https://www.nike.com.co/guia-de-tallas',
+    description: 'Medición con apoyo, papel y regla; utilizar el pie mayor y la tabla específica del producto.',
+  },
+  {
+    title: 'Simplicity · cuerpo, prenda y holgura',
+    url: 'https://simplicity.com/how-to-choose-your-ideal-pattern-size',
+    description: 'La prenda terminada incorpora holgura y diseño; sus dimensiones no equivalen a las medidas del cuerpo.',
+  },
+];
+
+
+const $ = id => document.getElementById(id);
+const canvas = $('canvas'), ctx = canvas.getContext('2d'), video = $('video'), overlay = $('liveOverlay'), overlayCtx = overlay.getContext('2d');
+const state = { garment: 'shirt', step: 1, view: 'front', photos: {}, measurements: {}, catalogId: 'eci-nino', customCatalogs: [], demo: false };
+let stream = null, cameraToken = 0, imageToken = 0, assistant = null, assistToken = 0, pose = null, dragging = false, pointerMoved = false, activePoint = 'top', dragKey = null;
+const GARMENT_DATA = {
+ shirt: { name: 'Camisa', description: 'Pecho, hombros y manga', needed: 'Contorno de pecho. Revisa además cuello, manga y largo según el modelo.', icon: '<path d="m22 13-13 8 9 15 8-5v31h30V31l8 5 9-15-13-8-11-3-7 9-7-9-13 3Z"/><path d="m35 10 7 9-8 7-8-13m23-3-7 9 8 7 8-13M42 24v38"/>' },
+ pants: { name: 'Pantalón', description: 'Cintura, cadera y pierna', needed: 'Contornos de cintura y cadera. Verifica entrepierna y largo por separado.', icon: '<path d="M22 10h40l5 54H48l-6-32-6 32H17l5-54Z"/><path d="M21 20h42M42 11v21m-18-11-4 11m39-11 4 11"/>' },
+ skirt: { name: 'Falda', description: 'Cintura, cadera y largo', needed: 'Contornos de cintura y cadera. El largo depende del modelo y del reglamento del colegio.', icon: '<path d="M25 11h34l13 51c-20 8-40 8-60 0l13-51Z"/><path d="M24 21h36M33 24l-6 40m24-40 6 40M42 24v42"/>' },
+ shoes: { name: 'Zapatos', description: 'Ambos pies, largo y ancho', needed: 'Longitud de ambos pies con regla. Se compara el mayor y se revisa el ancho al probar el calzado.', icon: '<path d="M13 36c12 0 16-8 18-18l16 7 4 15 15 5c9 3 11 9 9 15H10V43c0-5 0-7 3-7Z"/><path d="M10 52h64M37 30l10 3m-7 3 10 3m-8 3 11 3"/>' }
+};
+const POINTS = {
+ top: ['Cabeza', 'Marca la parte superior real de la cabeza; evita contar cabello voluminoso.'],
+ bottom: ['Suelo', 'Marca el suelo a nivel de las plantas, centrado entre los pies.'],
+ shoulderL: ['Hombro izquierdo de la imagen', 'Marca el extremo del hombro a tu izquierda en la foto.'],
+ shoulderR: ['Hombro derecho de la imagen', 'Marca el extremo del hombro a tu derecha, al mismo nivel que el otro.'],
+ waistL: ['Cintura izquierda de la imagen', 'Marca el borde de la cintura natural a tu izquierda.'],
+ waistR: ['Cintura derecha de la imagen', 'Marca el borde opuesto de la cintura, al mismo nivel.'],
+ hipL: ['Cadera izquierda de la imagen', 'Marca el borde exterior de la zona más ancha de la cadera, a tu izquierda.'],
+ hipR: ['Cadera derecha de la imagen', 'Marca el borde opuesto de la cadera al mismo nivel.'],
+ elbow: ['Codo del brazo derecho de la imagen', 'Marca el codo del mismo brazo que el hombro derecho de la imagen.'],
+ wrist: ['Muñeca del brazo derecho de la imagen', 'Marca la muñeca de ese brazo. Revisa su posición antes de calcular la manga.'],
+ crotch: ['Inicio de la entrepierna', 'Con la persona vestida, marca el inicio visible de la entrepierna del pantalón; si no se distingue, no estimes esta medida.'],
+ waistFront: ['Cintura · borde delantero', 'En la vista lateral, marca la parte delantera de la cintura.'],
+ waistBack: ['Cintura · borde de espalda', 'Marca la parte posterior de la cintura al mismo nivel.'],
+ hipFront: ['Cadera · borde delantero', 'Marca el borde delantero de la cadera en la vista lateral.'],
+ hipBack: ['Cadera · borde de espalda', 'Marca el borde posterior de la cadera al mismo nivel.'],
+ refA: ['Referencia · primer extremo', 'Marca un extremo del segmento físico cuya longitud comprobaste con regla.'],
+ refB: ['Referencia · segundo extremo', 'Marca el otro extremo de esa referencia, sobre el mismo plano del pie.'],
+ heel: ['Talón', 'Marca la parte más posterior del talón, con el pie apoyado.'],
+ toe: ['Dedo más largo', 'Marca el extremo del dedo más largo, que no siempre es el dedo gordo.'],
+ footL: ['Ancho del pie · borde izquierdo', 'Marca el borde izquierdo de la parte más ancha del pie.'],
+ footR: ['Ancho del pie · borde derecho', 'Marca el borde derecho de esa misma zona.']
+};
+const FIELDS = {
+ chest: ['Contorno de pecho', 'Rodea la parte más prominente con cinta horizontal.'],
+ waist: ['Contorno de cintura', 'Rodea la cintura natural sin apretar.'],
+ hip: ['Contorno de cadera', 'Rodea la parte más ancha de cadera y glúteos.'],
+ inseam: ['Entrepierna (opcional)', 'Desde la entrepierna hasta el largo deseado; revisa el modelo.'],
+ sleeve: ['Manga (opcional)', 'Del hombro a la muñeca siguiendo el brazo.'],
+ skirtLength: ['Largo de falda (opcional)', 'De cintura a la altura requerida por el colegio.'],
+ leftFoot: ['Largo del pie izquierdo', 'Con peso apoyado, del talón al dedo más largo.'],
+ rightFoot: ['Largo del pie derecho', 'Mide también este pie y confirma el ancho al probar.']
+};
+const format = value => Number(value).toLocaleString('es-GT', { maximumFractionDigits: 1 });
+const node = (tag, text, className) => { const element = document.createElement(tag); if (text !== undefined) element.textContent = text; if (className) element.className = className; return element; };
+const currentPhoto = () => state.photos[state.view];
+const isFoot = () => state.garment === 'shoes';
+const views = () => isFoot() ? [['leftFoot','Pie izquierdo'],['rightFoot','Pie derecho']] : [['front','Frontal'],['side','Lateral · opcional']];
+function pointKeys(view=state.view) {
+ if (isFoot()) return ['refA','refB','heel','toe','footL','footR'];
+ if (view === 'side') return ['top','bottom','waistFront','waistBack','hipFront','hipBack'];
+ if (state.garment === 'shirt') return ['top','bottom','shoulderL','shoulderR','waistL','waistR','elbow','wrist'];
+ return ['top','bottom','waistL','waistR','hipL','hipR', ...(state.garment === 'pants' ? ['crotch'] : [])];
+}
+function status(text, error = false) { $('cameraStatus').textContent = text; $('cameraStatus').classList.toggle('error', error); }
+function announce(text) { $('globalStatus').textContent = text; }
+function selectStep(step, focus = true) {
+ if (step !== 3) stopCamera();
+ state.step = Math.max(1, Math.min(5, step));
+ for (let i=1;i<=5;i++) $('step'+i).hidden = i !== state.step;
+ for (const button of $('steps').children) { if (Number(button.dataset.step) === state.step) button.setAttribute('aria-current','step'); else button.removeAttribute('aria-current'); }
+ if (state.step === 3) renderCapture();
+ if (state.step === 4) { renderMeasureFields(); renderCatalogs(); }
+ if (state.step === 5) renderRecommendation();
+ if (focus) { const heading=$('title'+state.step); heading.focus({preventScroll:true}); $('steps').scrollIntoView({block:'start',behavior:'instant'}); }
+}
+function setGarment(garment) {
+ if (!GARMENT_DATA[garment]) return;
+ stopCamera(); imageToken++; state.garment=garment; state.view=isFoot()?'leftFoot':'front'; activePoint=pointKeys()[0];
+ $('confirmed').checked=false; $('referenceAccepted').checked=false;
+ state.catalogId=isFoot()?'clarks-kids':garment==='skirt'?'eci-nina':'eci-nino';
+ for (const button of $('garments').children) button.setAttribute('aria-pressed', String(button.dataset.garment===garment));
+ renderPreparation(); renderMeasureFields(); renderCatalogs(); renderCapture();
+ announce(`${GARMENT_DATA[garment].name} seleccionada.`);
+}
+function renderPreparation() {
+ $('selectedGarment').textContent=GARMENT_DATA[state.garment].name; $('neededMeasures').textContent=GARMENT_DATA[state.garment].needed;
+ $('bodyCalibration').hidden=isFoot();$('footCalibration').hidden=!isFoot();
+ $('prepSubtitle').textContent=isFoot()?'Una captura independiente para cada pie, con referencia física comprobada.':'La estatura sirve de escala; una persona adulta puede ayudarte a encuadrar.';
+ const instructions=isFoot()?['Mide ambos pies descalzos y con el peso repartido. Utiliza el pie de mayor longitud.','Apoya el pie sobre un suelo plano, junto a una referencia medida con regla; evita que el pie la tape.','Fotografía desde arriba y perpendicular al suelo. La inclinación de la cámara introduce errores.','Comprueba la longitud con regla y el ancho al probar ambos zapatos.']:['Usa ropa ajustada, sin zapatos. No es necesario mostrar detalles del rostro.','Coloca la cámara recta a media altura del cuerpo y evita el gran angular. Usa ayuda de otra persona.','Incluye cabeza y plantas de los pies; separa ligeramente los brazos.','Para menores, cuenta con la autorización de su responsable. Repite si hay movimiento o mala luz.'];
+ $('prepList').replaceChildren(...instructions.map(text=>node('li',text)));
+}
+function renderViews() {
+ $('viewTabs').replaceChildren(...views().map(([key,label])=>{const button=node('button',label);button.setAttribute('aria-pressed',String(key===state.view));button.addEventListener('click',()=>{stopCamera();imageToken++;state.view=key;activePoint=pointKeys()[0];renderCapture();});return button;}));
+ $('assistButton').disabled=isFoot()||state.view!=='front';
+ if(isFoot()) $('assistStatus').textContent='Para pies se usa referencia física y revisión manual; el detector corporal no mide calzado.';
+ else if(state.view==='side') $('assistStatus').textContent='La asistencia de postura está disponible en la vista frontal. Revisa la lateral manualmente.';
+ else if(!assistant) $('assistStatus').textContent='Opcional. Primera carga de unos 20 MB. Google MediaPipe se ejecuta aquí; las fotos no se envían a servidores.';
+ $('empty').querySelector('h3').textContent=isFoot()?'Encuadra el pie y la referencia':'La guía está lista';
+}
+function renderCapture() {
+ renderViews(); const photo=currentPhoto();
+ $('captureSubtitle').textContent=isFoot()?'Captura cada pie desde arriba junto al segmento de referencia. Comprueba la medida con regla.':'La silueta orienta el encuadre. Ajusta su ancho como ayuda visual; no define el cuerpo de una talla.';
+ $('empty').hidden=!!photo||!!stream; canvas.hidden=!photo||!!stream; video.hidden=!stream; overlay.hidden=!stream;
+ $('captureAction').hidden=!stream;$('stopCamera').hidden=!stream;
+ $('captureMode').textContent=stream?'CÁMARA EN VIVO':photo?(photo.demo?'EJEMPLO FICTICIO':'FOTO · MARCADO MANUAL'):'SIN CAPTURA';
+ if(photo&&!stream){canvas.width=photo.source.width;canvas.height=photo.source.height;}
+ renderPointControls();drawPhoto();renderPhotoResults();
+}
+function renderPointControls() {
+ const photo=currentPhoto(), keys=pointKeys(); if(!keys.includes(activePoint))activePoint=keys[0];
+ $('pointToolbar').hidden=!photo||!!stream;
+ $('photoPoint').replaceChildren(...keys.map((key,index)=>{const option=node('option',`${photo?.points[key]?'✓ ':''}${index+1}. ${POINTS[key][0]}`);option.value=key;return option;}));
+ $('photoPoint').value=activePoint;
+ const marked=keys.filter(key=>photo?.points[key]).length;
+ $('pointInstruction').textContent=`${marked}/${keys.length} puntos · ${POINTS[activePoint][1]}`;
+ $('resetPoints').disabled=!photo||!!stream;$('undoPoint').disabled=!photo?.history.length||!!stream;
+}
+function photoMeasurement(photo=currentPhoto(), view=state.view) {
+ if(!photo)return {measures:[],warnings:[],errors:[]};
+ const keys=pointKeys(view),points=Object.fromEntries(Object.entries(photo.points).filter(([key])=>keys.includes(key)));
+ const result=measurePhoto({kind:isFoot()?'foot':'body',view:!isFoot()?view:'front',points,width:photo.source.width,height:photo.source.height,heightCm:Number($('height').value),referenceCm:Number($('reference').value)});
+ const allowed=isFoot()?['footLength','footWidth']:view==='side'?['waistDepth','hipDepth']:state.garment==='shirt'?['shoulderWidth','waistWidth','torsoLength','sleeveLength']:state.garment==='pants'?['waistWidth','hipWidth','legLength','inseam']:['waistWidth','hipWidth'];
+ result.measures=result.measures.filter(measure=>allowed.includes(measure.id));return result;
+}
+function renderPhotoResults() {
+ const photo=currentPhoto(), target=$('photoResults');target.replaceChildren();$('photoWarnings').replaceChildren();
+ if(stream){target.append(node('p','Captura una foto para marcar y calcular.','hint'));return;}
+ if(!photo){target.append(node('p','Aparecerán al calibrar y marcar los puntos.','hint'));return;}
+ const missing=pointKeys().filter(key=>!photo.points[key]);
+ if(missing.length){target.append(node('p',`Faltan ${missing.length} puntos de esta vista. ${isFoot()?'La referencia física debe estar en el mismo plano.':'Comprueba la estatura en Preparación.'}`,'hint'));return;}
+ const output=photoMeasurement(photo);
+ for(const measure of output.measures){const row=node('div',undefined,'photo-row');row.append(node('span',measure.label),node('strong',`≈ ${format(isFoot()?measure.value:Math.round(measure.value))} cm`));target.append(row);}
+ if(!output.measures.length)target.append(node('p','Revisa los puntos o la calibración.','hint'));
+ for(const message of [...output.errors,...output.warnings]) $('photoWarnings').append(node('p',message));
+}
+function drawPhoto() {
+ const photo=currentPhoto();if(!photo||stream)return;const {source,points}=photo;
+ ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(source,0,0);const u=Math.max(canvas.width,canvas.height)/700;
+ const segments=isFoot()?[['refA','refB'],['heel','toe'],['footL','footR']]:state.view==='side'?[['top','bottom'],['waistFront','waistBack'],['hipFront','hipBack']]:[['top','bottom'],['shoulderL','shoulderR'],['waistL','waistR'],['hipL','hipR'],['shoulderR','elbow'],['elbow','wrist'],['crotch','bottom']];
+ const keys=pointKeys();
+ for(const [a,b]of segments){if(!points[a]||!points[b]||!keys.includes(a)||!keys.includes(b))continue;ctx.beginPath();ctx.moveTo(points[a].x,points[a].y);ctx.lineTo(points[b].x,points[b].y);ctx.lineWidth=2*u;ctx.strokeStyle=a==='refA'?'#ffcf50':'#45d9c7';ctx.setLineDash(a==='top'?[6*u,5*u]:[]);ctx.stroke();}
+ ctx.setLineDash([]);keys.forEach((key,index)=>{const p=points[key];if(!p)return;ctx.beginPath();ctx.arc(p.x,p.y,(key===activePoint?12:10)*u,0,Math.PI*2);ctx.fillStyle=key===activePoint?'#ffcf50':'#145dc4';ctx.fill();ctx.lineWidth=2*u;ctx.strokeStyle='white';ctx.stroke();ctx.fillStyle=key===activePoint?'#172b4d':'white';ctx.font=`bold ${11*u}px system-ui`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(index+1),p.x,p.y);});
+}
+function drawLoupe(p) {
+ if(!$('showLoupe').checked||!currentPhoto())return;
+ const c=$('loupe'),d=c.getContext('2d'),source=currentPhoto().source; const region=Math.max(source.width,source.height)/8;
+ d.fillStyle='#eaf0f7';d.fillRect(0,0,150,150);d.drawImage(source,p.x-region/2,p.y-region/2,region,region,0,0,150,150);d.strokeStyle='#ffcf50';d.lineWidth=2;d.beginPath();d.moveTo(60,75);d.lineTo(90,75);d.moveTo(75,60);d.lineTo(75,90);d.stroke();c.hidden=false;
+}
+function drawOverlay() {
+ if(!stream||!video.videoWidth)return;
+ const rect=$('stage').getBoundingClientRect(),ratio=Math.min(rect.width/video.videoWidth,rect.height/video.videoHeight),w=video.videoWidth*ratio,h=video.videoHeight*ratio;
+ overlay.width=video.videoWidth;overlay.height=video.videoHeight;Object.assign(overlay.style,{left:`${(rect.width-w)/2}px`,top:`${(rect.height-h)/2}px`,width:`${w}px`,height:`${h}px`});
+ const d=overlayCtx,W=overlay.width,H=overlay.height;d.clearRect(0,0,W,H);const unit=Math.max(W,H)/700;
+ if($('showGuide').checked){
+  const spread=Number($('guideWidth').value)/100,center=W/2,top=H*.07,bottom=H*.92,bodyH=bottom-top;
+  d.strokeStyle='#d5efb7';d.lineWidth=2*unit;d.setLineDash([7*unit,6*unit]);d.beginPath();d.moveTo(center,top);d.lineTo(center,bottom);d.moveTo(W*.1,bottom);d.lineTo(W*.9,bottom);d.stroke();d.setLineDash([]);
+  if(isFoot()){d.beginPath();d.ellipse(center,H*.48,W*.15,H*.32,0,0,Math.PI*2);d.stroke();d.beginPath();d.moveTo(W*.12,H*.89);d.lineTo(W*.88,H*.89);d.stroke();}
+  else if(state.view==='side'){const half=Math.min(W*spread/3,bodyH*.13);d.beginPath();d.ellipse(center,top+bodyH*.08,bodyH*.045,bodyH*.075,0,0,Math.PI*2);d.moveTo(center-half*.4,top+bodyH*.17);d.bezierCurveTo(center-half*.9,top+bodyH*.28,center-half*.5,top+bodyH*.45,center-half*.65,top+bodyH*.6);d.lineTo(center-half*.35,bottom);d.lineTo(center+half*.85,bottom);d.moveTo(center+half*.4,top+bodyH*.17);d.bezierCurveTo(center+half,top+bodyH*.32,center+half*.4,top+bodyH*.45,center+half*.6,top+bodyH*.6);d.lineTo(center+half*.35,bottom);d.moveTo(center+half*.1,top+bodyH*.23);d.lineTo(center+half*.9,top+bodyH*.56);d.stroke();}
+  else{const half=Math.min(W*spread/2,bodyH*.23);d.beginPath();d.ellipse(center,top+bodyH*.08,bodyH*.045,bodyH*.075,0,0,Math.PI*2);d.moveTo(center-half*.75,top+bodyH*.23);d.lineTo(center-half*.47,top+bodyH*.18);d.lineTo(center+half*.47,top+bodyH*.18);d.lineTo(center+half*.75,top+bodyH*.23);d.lineTo(center+half,top+bodyH*.55);d.moveTo(center-half*.75,top+bodyH*.23);d.lineTo(center-half,top+bodyH*.55);d.moveTo(center-half*.47,top+bodyH*.21);d.lineTo(center-half*.35,top+bodyH*.5);d.lineTo(center-half*.46,top+bodyH*.61);d.lineTo(center-half*.38,bottom);d.moveTo(center+half*.47,top+bodyH*.21);d.lineTo(center+half*.35,top+bodyH*.5);d.lineTo(center+half*.46,top+bodyH*.61);d.lineTo(center+half*.38,bottom);d.moveTo(center,top+bodyH*.61);d.lineTo(center-half*.12,bottom);d.moveTo(center,top+bodyH*.61);d.lineTo(center+half*.12,bottom);d.stroke();}
+ }
+ if(pose?.landmarks?.[0]&&!isFoot()){
+  const landmarks=pose.landmarks[0];d.strokeStyle='#80d8ff';d.lineWidth=2*unit;for(const [a,b]of [[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28]]){const p=landmarks[a],q=landmarks[b];if(!p||!q||(p.visibility??1)<.6||(q.visibility??1)<.6)continue;d.beginPath();d.moveTo(p.x*W,p.y*H);d.lineTo(q.x*W,q.y*H);d.stroke();}for(const i of [11,12,13,14,15,16,23,24,25,26,27,28]){const p=landmarks[i];if(!p||(p.visibility??1)<.6)continue;d.beginPath();d.arc(p.x*W,p.y*H,4*unit,0,Math.PI*2);d.fillStyle='#d5efb7';d.fill();}
+ }
+}
+function disposeAssistant() { assistToken++; if(assistant)assistant.dispose();assistant=null;pose=null;$('poseChecks').hidden=true;$('assistButton').textContent='Activar asistente de Google';$('assistButton').disabled=isFoot()||state.view!=='front'; }
+function stopCamera() {
+ cameraToken++;if(stream)stream.getTracks().forEach(track=>track.stop());stream=null;video.srcObject=null;video.hidden=true;overlay.hidden=true;$('captureAction').hidden=true;$('stopCamera').hidden=true;$('capture').disabled=true;$('startCamera').disabled=false;$('facing').disabled=false;disposeAssistant();
+ if(state.step===3)renderCapture();
+}
+function leaveDemo() { if(!state.demo)return;state.demo=false;state.photos={};state.measurements={};$('height').value='';$('reference').value='20';$('confirmed').checked=false;$('referenceAccepted').checked=false;$('demoBanner').hidden=true;renderMeasureFields(); }
+async function startCamera() {
+ leaveDemo();stopCamera();const token=cameraToken;imageToken++;$('startCamera').disabled=true;$('stopCamera').hidden=false;
+ if(!navigator.mediaDevices?.getUserMedia){$('startCamera').disabled=false;status('No hay acceso a cámara en este contexto. Abre el enlace HTTPS o usa Cargar foto.',true);return;}
+ status('Esperando permiso de cámara…');
+ try{
+  const next=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:$('facing').value},width:{ideal:1080},height:{ideal:1440}},audio:false});
+  if(token!==cameraToken){next.getTracks().forEach(track=>track.stop());return;}
+  stream=next;video.srcObject=stream;$('facing').disabled=true;renderCapture();await video.play();if(token!==cameraToken)return;
+  $('capture').disabled=!(video.videoWidth&&video.videoHeight);drawOverlay();status('Revisa cabeza y pies completos, o el pie y su referencia. La silueta es una ayuda de encuadre.');
+ }catch(error){if(token!==cameraToken)return;stopCamera();const reasons={NotAllowedError:'No se concedió permiso de cámara. Puedes revisarlo en el navegador o cargar una foto.',NotFoundError:'No se encontró una cámara. Usa Cargar foto.',NotReadableError:'La cámara está ocupada. Cierra otras apps que la usen o carga una foto.'};status(reasons[error.name]||'No se pudo iniciar la cámara. Usa un navegador con HTTPS o carga una foto.',true);}
+}
+function setPhoto(image,{demo=false,points={},view=state.view}={}) {
+ stopCamera();const w=image.naturalWidth||image.width,h=image.naturalHeight||image.height,ratio=Math.min(1,1600/Math.max(w,h));
+ const source=document.createElement('canvas');source.width=Math.round(w*ratio);source.height=Math.round(h*ratio);source.getContext('2d').drawImage(image,0,0,source.width,source.height);
+ state.photos[view]={source,points:Object.fromEntries(Object.entries(points).map(([key,p])=>[key,{x:p.x*ratio,y:p.y*ratio}])),history:[],demo};
+ activePoint=pointKeys()[0];renderCapture();status('Foto lista. Marca los puntos en el orden indicado y comprueba la calibración.');
+}
+async function enableAssistant(){
+ if(!stream){$('assistStatus').textContent='Activa primero la cámara para usar la guía automática.';return;}
+ if(assistant){disposeAssistant();drawOverlay();$('assistStatus').textContent='Asistente detenido. Puedes seguir con la silueta y el marcado manual.';return;}
+ if(location.protocol==='file:'){$('assistStatus').textContent='El asistente requiere la versión HTTPS. El marcado manual del HTML funciona sin conexión.';return;}
+ const token=++assistToken;$('assistButton').disabled=true;$('assistStatus').textContent='Preparando MediaPipe en este dispositivo…';
+ try{
+  const {createPoseAssistant}=await import('/vision.mjs');
+  const next=await createPoseAssistant({video,onStatus:message=>{if(token===assistToken)$('assistStatus').textContent=message;},onResult:result=>{if(token!==assistToken||!stream)return;pose=result;drawOverlay();$('assistStatus').textContent=result.message;$('poseChecks').hidden=false;const labels={person:'Una persona',centered:'Centrado',fullBody:'Puntos visibles',level:'Hombros nivelados',arms:'Brazos separados'};$('poseChecks').replaceChildren(...Object.entries(labels).map(([key,label])=>node('span',`${result.checks[key]?'✓':'○'} ${label}`,`check-chip${result.checks[key]?' ok':''}`)));}});
+  if(token!==assistToken||!stream){next.dispose();return;}assistant=next;assistant.start();$('assistButton').disabled=false;$('assistButton').textContent='Detener asistente';
+ }catch(error){if(token!==assistToken)return;$('assistStatus').textContent='No se pudo preparar el asistente. La cámara y el marcado manual siguen disponibles.';$('assistButton').disabled=false;}
+}
+function eventPoint(event){const rect=canvas.getBoundingClientRect();return {x:Math.max(0,Math.min(canvas.width,(event.clientX-rect.left)*canvas.width/rect.width)),y:Math.max(0,Math.min(canvas.height,(event.clientY-rect.top)*canvas.height/rect.height))};}
+function snapshotPoints(){const photo=currentPhoto();if(!photo)return;photo.history.push(structuredClone(photo.points));if(photo.history.length>35)photo.history.shift();}
+function updatePoint(point){const photo=currentPhoto();if(!photo||stream)return;photo.points[dragKey||activePoint]=point;renderPointControls();drawPhoto();drawLoupe(point);renderPhotoResults();}
+function renderMeasureFields(){
+ const required=requiredFieldsFor(state.garment),optional=state.garment==='shirt'?['sleeve']:state.garment==='pants'?['inseam']:state.garment==='skirt'?['skirtLength']:[];
+ $('measurementHeading').textContent=isFoot()?'Longitudes comprobadas con regla':'Contornos comprobados con cinta';
+ $('measurementFields').replaceChildren(...[...required,...optional].map(key=>{
+  const field=node('div',undefined,'measurement-field'),label=node('label',FIELDS[key][0],'field');label.htmlFor='measure-'+key;label.append(node('span','cm'));
+  const input=document.createElement('input');input.id='measure-'+key;input.type='number';input.inputMode='decimal';input.step='.1';input.min=isFoot()?'8':'1';input.max=isFoot()?'35':'250';input.placeholder=isFoot()?'Ej. 18.5':'En centímetros';input.value=state.measurements[key]??'';
+  input.setAttribute('aria-describedby','help-'+key);const hint=node('p',FIELDS[key][1],'hint');hint.id='help-'+key;
+  input.addEventListener('input',()=>{state.measurements[key]=input.value;$('confirmed').checked=false;});field.append(label,input,hint);return field;
+ }));
+}
+function availableCatalogs(){return [...CATALOGS,...state.customCatalogs].filter(c=>c.kind===(isFoot()?'foot':'body')&&(!c.garment||c.garment===state.garment));}
+function getCatalog(){const available=availableCatalogs();return available.find(c=>c.id===state.catalogId)||available[0];}
+function renderCatalogs(){
+ const catalogs=availableCatalogs();if(!catalogs.some(c=>c.id===state.catalogId))state.catalogId=catalogs[0]?.id;
+ $('catalog').replaceChildren(...catalogs.map(c=>{const option=node('option',c.name);option.value=c.id;return option;}));$('catalog').value=state.catalogId;renderCatalogDetails();
+}
+function renderCatalogDetails(){
+ const c=getCatalog();$('catalogNote').textContent=c?`${c.note||'Tabla corporal importada para esta prenda.'} ${c.date?'Consultada: '+c.date+'.':''}`:'Selecciona una tabla.';
+ $('catalogSource').hidden=!c?.source;if(c?.source)$('catalogSource').href=c.source;
+ $('referenceAcceptanceLabel').textContent=c?.id?.startsWith('custom-')?'Confirmo que esta tabla corporal pertenece al proveedor y modelo que voy a probar.':'Entiendo que es una referencia de esta marca para pruebas y puede diferir de la del proveedor del colegio.';
+ const columns=isFoot()?[['size','Talla Clarks EU / proveedor'],['foot','Pie (cm)']]:[['size','Talla'],['chest','Pecho (cm)'],['waist','Cintura (cm)'],['hip','Cadera (cm)']];
+ const table=document.createElement('table'),head=document.createElement('thead'),tr=document.createElement('tr');for(const [,label]of columns)tr.append(node('th',label));head.append(tr);table.append(head);const body=document.createElement('tbody');for(const row of c?.rows||[]){const line=document.createElement('tr');for(const [key]of columns)line.append(node('td',row[key]===undefined?'—':String(row[key])));body.append(line);}table.append(body);$('catalogTable').replaceChildren(table);
+}
+function recommendation(){return recommendSize({garment:state.garment,measurements:state.measurements,catalog:getCatalog(),confirmed:$('confirmed').checked,referenceAccepted:$('referenceAccepted').checked});}
+function renderRecommendation(){
+ const output=recommendation(),catalog=getCatalog(),target=$('recommendation');target.classList.toggle('ready',output.status==='ready');target.replaceChildren();
+ target.append(node('div',state.demo?'EJEMPLO FICTICIO':output.status==='ready'?'TALLA DE REFERENCIA PARA PROBAR':'FALTA REVISIÓN','result-kicker'));
+ target.append(node('div',output.status==='ready'?output.size:output.status==='outside'?'Fuera de esta tabla':output.status==='missing'?'Completa la verificación':'Revisa la tabla',`result-size${output.status==='ready'?'':' waiting'}`));
+ target.append(node('p',`${GARMENT_DATA[state.garment].name} · ${catalog?.name||'Sin tabla'}`,'result-subtitle'));
+ target.append(node('p',output.status==='ready'?'La sugerencia es orientativa. Confirma corte, largos y ajuste con el proveedor.':'No se extrapola ni se inventa una talla cuando faltan datos o la tabla no cubre las medidas.','result-note'));
+ const evidence=$('resultEvidence');evidence.replaceChildren();for(const key of requiredFieldsFor(state.garment)){const value=state.measurements[key];evidence.append(node('span',`${FIELDS[key][0]}: ${value?format(value)+' cm':'pendiente'}`,'evidence-chip'));}
+ const list=node('ul',undefined,'evidence-list');for(const text of output.details)list.append(node('li',text));if(!output.details.length)list.append(node('li','La talla necesita medidas comprobadas y una tabla aceptada.'));evidence.append(list);
+ evidence.append(node('p',Object.keys(state.photos).length?`Capturas de apoyo: ${Object.keys(state.photos).map(v=>({front:'frontal',side:'lateral',leftFoot:'pie izquierdo',rightFoot:'pie derecho'})[v]).join(', ')}. No se usan anchos de foto como contornos.`:'Recorrido con cinta o regla; sin fotografía.','hint'));
+ const warnings=[...output.warnings];if(state.garment==='shirt')warnings.push('Verifica cuello, manga y largo con el modelo de camisa; esta referencia compara pecho.');if(state.garment==='pants')warnings.push('Comprueba entrepierna y largo del pantalón por separado.');if(state.garment==='skirt')warnings.push('Comprueba el largo solicitado por el colegio.');if(isFoot())warnings.push('Esta comparación por largo no determina ancho, horma ni ajuste.');
+ $('reviewWarnings').replaceChildren(...warnings.map(text=>node('p',text)));
+}
+function reportText(){
+ const output=recommendation(),catalog=getCatalog(),lines=['TALLALAB 2.0 — INFORME ORIENTATIVO',state.demo?'EJEMPLO FICTICIO. NO CORRESPONDE A UNA PERSONA.':'Sesión de prueba; datos introducidos por el usuario.',`Fecha: ${new Date().toLocaleString('es-GT')}`,`Prenda: ${GARMENT_DATA[state.garment].name}`,`Referencia: ${catalog?.name||'Sin tabla'}`,`Fuente: ${catalog?.source||'Tabla importada por el usuario'}`,`Estado: ${output.status}`,`Talla de referencia: ${output.size||'No se asigna'}`,'','MEDIDAS INTRODUCIDAS (cm)'];
+ for(const [key,value]of Object.entries(state.measurements))if(value&&FIELDS[key])lines.push(`${FIELDS[key][0]}: ${value}`);
+ lines.push(`Verificación declarada con cinta o regla: ${$('confirmed').checked?'sí':'pendiente'}`,`Referencia aceptada: ${$('referenceAccepted').checked?'sí':'pendiente'}`,'','APOYO FOTOGRÁFICO: ESTIMACIONES');
+ for(const [view,photo]of Object.entries(state.photos)){const result=photoMeasurement(photo,view);lines.push(`Vista: ${view}`);for(const measure of result.measures)lines.push(`${measure.label}: aprox. ${format(measure.value)} cm`);for(const error of result.errors)lines.push(`Revisar: ${error}`);}
+ lines.push('','COMPARACIÓN',...output.details,...output.warnings,'','LÍMITES','No existe una tabla universal de tallas. Se utiliza la primera referencia nominal igual o mayor en todas las dimensiones necesarias; es una regla del prototipo y no un intervalo oficial. No se suma holgura automática.','La foto estima distancias visibles, no contornos corporales. MediaPipe orienta postura y encuadre; no certifica centímetros. La perspectiva, ropa y marcado afectan el resultado.','Sin precisión metrológica validada ni margen de error conocido. Verifica con cinta, tabla del proveedor y prueba de prenda; para zapatos mide ambos pies y comprueba el ancho.','Las fotos no se incluyen en este informe.');return lines.join('\r\n');
+}
+function downloadText(text,filename,type='text/plain;charset=utf-8'){const url=URL.createObjectURL(new Blob(['\ufeff',text],{type})),a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);}
+function makeDemo(){
+ stopCamera();imageToken++;state.demo=true;state.photos={};state.catalogId=isFoot()?'clarks-kids':state.garment==='skirt'?'eci-nina':'eci-nino';state.measurements={chest:'68',waist:state.garment==='skirt'?'62':'65',hip:'76',leftFoot:'18.5',rightFoot:'18.4',sleeve:'47',inseam:'61',skirtLength:'42'};$('height').value='140';$('reference').value='20';$('confirmed').checked=true;$('referenceAccepted').checked=true;$('demoBanner').hidden=false;
+ const source=document.createElement('canvas');source.width=600;source.height=800;const d=source.getContext('2d');d.fillStyle='#eaf0f7';d.fillRect(0,0,600,800);d.fillStyle='#6783a0';
+ let points;
+ if(isFoot()){d.beginPath();d.moveTo(280,550);d.bezierCurveTo(230,550,220,490,235,420);d.bezierCurveTo(205,330,225,240,270,190);d.bezierCurveTo(300,150,335,175,335,215);d.bezierCurveTo(390,235,375,330,360,400);d.bezierCurveTo(345,470,335,550,280,550);d.fill();d.strokeStyle='#54799e';d.lineWidth=3;d.beginPath();d.moveTo(80,650);d.lineTo(480,650);d.stroke();d.font='20px system-ui';d.fillStyle='#536b84';d.fillText('Referencia ficticia: 20 cm',170,690);points={refA:{x:80,y:650},refB:{x:480,y:650},heel:{x:300,y:550},toe:{x:300,y:180},footL:{x:230,y:350},footR:{x:370,y:350}};}
+ else {d.beginPath();d.ellipse(300,115,38,45,0,0,Math.PI*2);d.fill();d.beginPath();d.moveTo(280,158);d.lineTo(320,158);d.lineTo(385,210);d.lineTo(430,330);d.lineTo(450,420);d.lineTo(423,426);d.lineTo(402,342);d.lineTo(355,265);d.lineTo(350,380);d.lineTo(370,460);d.lineTo(355,735);d.lineTo(370,748);d.lineTo(315,748);d.lineTo(300,500);d.lineTo(285,748);d.lineTo(230,748);d.lineTo(245,735);d.lineTo(230,460);d.lineTo(250,380);d.lineTo(245,265);d.lineTo(198,342);d.lineTo(177,426);d.lineTo(150,420);d.lineTo(170,330);d.lineTo(215,210);d.closePath();d.fill();points={top:{x:300,y:70},bottom:{x:300,y:748},shoulderL:{x:215,y:210},shoulderR:{x:385,y:210},waistL:{x:250,y:380},waistR:{x:350,y:380},hipL:{x:230,y:460},hipR:{x:370,y:460},elbow:{x:430,y:330},wrist:{x:450,y:420},crotch:{x:300,y:500}};}
+ d.fillStyle='#56708b';d.textAlign='center';d.font='16px system-ui';d.fillText('EJEMPLO FICTICIO · SIN DATOS REALES',300,785);
+ state.view=isFoot()?'leftFoot':'front';setPhoto(source,{demo:true,points});renderMeasureFields();renderCatalogs();selectStep(3);status('Ejemplo ficticio. Puedes ajustar puntos, verificar las medidas de ejemplo y explorar el resultado.');
+}
+function newSession(){stopCamera();imageToken++;state.photos={};state.measurements={};state.demo=false;state.view=isFoot()?'leftFoot':'front';$('height').value='';$('reference').value='20';$('confirmed').checked=false;$('referenceAccepted').checked=false;$('demoBanner').hidden=true;$('photoInput').value='';$('csvStatus').textContent='';activePoint=pointKeys()[0];canvas.width=1;canvas.height=1;$('loupe').hidden=true;renderMeasureFields();renderCapture();selectStep(1);announce('Nueva sesión lista. Fotos y medidas anteriores descartadas.');}
+
+for(const [key,data]of Object.entries(GARMENT_DATA)){const button=node('button',undefined,'garment-card');button.dataset.garment=key;button.setAttribute('aria-pressed',String(key===state.garment));const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');icon.setAttribute('viewBox','0 0 84 78');icon.setAttribute('fill','none');icon.setAttribute('stroke','currentColor');icon.setAttribute('stroke-width','2');icon.setAttribute('stroke-linejoin','round');icon.setAttribute('aria-hidden','true');icon.innerHTML=data.icon;button.append(icon,node('span',data.name,'garment-name'),node('span',data.description,'garment-description'));button.addEventListener('click',()=>setGarment(key));$('garments').append(button);}
+for(const button of $('steps').children)button.addEventListener('click',()=>selectStep(Number(button.dataset.step)));
+document.querySelectorAll('[data-next]').forEach(button=>button.addEventListener('click',()=>selectStep(state.step+1)));
+document.querySelectorAll('[data-back]').forEach(button=>button.addEventListener('click',()=>selectStep(state.step-1)));
+$('skipCamera').addEventListener('click',()=>selectStep(4));$('editMeasures').addEventListener('click',()=>selectStep(4));$('measureAnother').addEventListener('click',()=>selectStep(1));
+document.querySelector('.brand').addEventListener('click',event=>{event.preventDefault();selectStep(1);});
+$('newSession').addEventListener('click',newSession);$('exitDemo').addEventListener('click',newSession);$('demoButton').addEventListener('click',makeDemo);
+$('startCamera').addEventListener('click',startCamera);$('stopCamera').addEventListener('click',()=>{stopCamera();status('Cámara cerrada. Puedes cargar otra foto o continuar.');});
+video.addEventListener('loadeddata',()=>{if(stream){$('capture').disabled=!(video.videoWidth&&video.videoHeight);drawOverlay();}});
+$('capture').addEventListener('click',()=>{if(!stream||!video.videoWidth)return;imageToken++;const frame=document.createElement('canvas');frame.width=video.videoWidth;frame.height=video.videoHeight;frame.getContext('2d').drawImage(video,0,0);setPhoto(frame);});
+$('photoInput').addEventListener('change',async event=>{const file=event.target.files[0];event.target.value='';if(!file)return;leaveDemo();stopCamera();const token=++imageToken,view=state.view;if(file.size>20*1024*1024){status('La foto supera 20 MB. Usa una copia más pequeña.',true);return;}status('Preparando foto…');const url=URL.createObjectURL(file),image=new Image();try{await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=reject;image.src=url;});if(token===imageToken&&view===state.view)setPhoto(image);}catch{if(token===imageToken)status('No se pudo leer esta imagen. Usa JPG, PNG o WebP compatible.',true);}finally{URL.revokeObjectURL(url);}});
+$('assistButton').addEventListener('click',enableAssistant);$('showGuide').addEventListener('change',drawOverlay);$('guideWidth').addEventListener('input',drawOverlay);window.addEventListener('resize',drawOverlay);
+$('photoPoint').addEventListener('change',event=>{activePoint=event.target.value;renderPointControls();drawPhoto();});
+function moveActive(direction){const keys=pointKeys();activePoint=keys[(keys.indexOf(activePoint)+direction+keys.length)%keys.length];renderPointControls();drawPhoto();}
+$('previousPoint').addEventListener('click',()=>moveActive(-1));$('nextPoint').addEventListener('click',()=>moveActive(1));
+canvas.addEventListener('pointerdown',event=>{if(!currentPhoto()||stream)return;event.preventDefault();const p=eventPoint(event),rect=canvas.getBoundingClientRect(),radius=22*canvas.width/rect.width;const nearest=pointKeys().filter(key=>currentPhoto().points[key]).map(key=>({key,d:Math.hypot(p.x-currentPhoto().points[key].x,p.y-currentPhoto().points[key].y)})).sort((a,b)=>a.d-b.d)[0];if(nearest?.d<=radius)activePoint=nearest.key;dragKey=activePoint;pointerMoved=false;dragging=true;snapshotPoints();canvas.setPointerCapture(event.pointerId);canvas.focus({preventScroll:true});updatePoint(p);});
+canvas.addEventListener('pointermove',event=>{if(!dragging)return;pointerMoved=true;updatePoint(eventPoint(event));});
+canvas.addEventListener('pointerup',event=>{if(!dragging)return;updatePoint(eventPoint(event));dragging=false;dragKey=null;$('loupe').hidden=true;const next=pointKeys().find(key=>!currentPhoto().points[key]);if(next)activePoint=next;renderPointControls();drawPhoto();});
+canvas.addEventListener('pointercancel',()=>{dragging=false;dragKey=null;$('loupe').hidden=true;});
+canvas.addEventListener('keydown',event=>{if(!currentPhoto()||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Enter'].includes(event.key))return;event.preventDefault();snapshotPoints();const p={...(currentPhoto().points[activePoint]||{x:canvas.width/2,y:canvas.height/2})},amount=(event.shiftKey?10:1)*Math.max(canvas.width,canvas.height)/700;if(event.key==='ArrowLeft')p.x-=amount;if(event.key==='ArrowRight')p.x+=amount;if(event.key==='ArrowUp')p.y-=amount;if(event.key==='ArrowDown')p.y+=amount;p.x=Math.max(0,Math.min(canvas.width,p.x));p.y=Math.max(0,Math.min(canvas.height,p.y));updatePoint(p);});
+canvas.addEventListener('blur',()=>{$('loupe').hidden=true;});
+$('undoPoint').addEventListener('click',()=>{const photo=currentPhoto();if(!photo?.history.length)return;photo.points=photo.history.pop();renderPointControls();drawPhoto();renderPhotoResults();});
+$('resetPoints').addEventListener('click',()=>{if(!currentPhoto())return;snapshotPoints();currentPhoto().points={};activePoint=pointKeys()[0];renderPointControls();drawPhoto();renderPhotoResults();});
+$('height').addEventListener('input',renderPhotoResults);$('reference').addEventListener('input',renderPhotoResults);
+$('catalog').addEventListener('change',()=>{state.catalogId=$('catalog').value;$('referenceAccepted').checked=false;renderCatalogDetails();});
+$('csvTemplate').addEventListener('click',()=>{const rows=isFoot()?'talla,pecho,cintura,cadera,pie_cm\r\nEJEMPLO_1,,,,18.5\r\nEJEMPLO_2,,,,19.3':'talla,pecho,cintura,cadera,pie_cm\r\nEJEMPLO_1,68,65,76,\r\nEJEMPLO_2,74,69,81,';downloadText(rows,'TallaLab-plantilla-tabla.csv','text/csv;charset=utf-8');});
+$('csvInput').addEventListener('change',async event=>{const file=event.target.files[0];event.target.value='';if(!file)return;try{if(file.size>250000)throw new Error('La tabla supera 250 KB.');const garment=state.garment,text=await file.text();if(garment!==state.garment)throw new Error('Cambiaste de prenda. Vuelve a importar su tabla.');const catalog=parseCatalogCsv(text,{name:$('supplierName').value.trim()||'Proveedor · tabla importada',garment});catalog.id='custom-'+crypto.randomUUID();catalog.date=new Date().toLocaleDateString('sv-SE');catalog.note='Tabla corporal proporcionada por el usuario. Verifica origen, modelo y unidades.';state.customCatalogs.push(catalog);state.catalogId=catalog.id;$('referenceAccepted').checked=false;renderCatalogs();$('csvStatus').textContent=`Tabla cargada: ${catalog.rows.length} tallas. Confirma su correspondencia antes de usarla.`;}catch(error){$('csvStatus').textContent=error.message;}});
+$('downloadReport').addEventListener('click',()=>downloadText(reportText(),'TallaLab-informe.txt'));
+$('printReport').addEventListener('click',()=>{$('printArea').replaceChildren(node('h1','TallaLab · Informe de prueba'),node('pre',reportText()));window.print();});
+for(const source of SOURCES){const section=node('div',undefined,'source-item'),a=node('a',source.title);a.href=source.url;a.target='_blank';a.rel='noopener noreferrer';section.append(a,node('p',source.description));$('sourcesList').append(section);}
+for(const id of ['sourcesButton','limitationsButton'])$(id).addEventListener('click',()=>$('sourcesDialog').showModal());$('closeSources').addEventListener('click',()=>$('sourcesDialog').close());
+window.addEventListener('pagehide',stopCamera);document.addEventListener('visibilitychange',()=>{if(document.hidden)stopCamera();});
+renderPreparation();renderMeasureFields();renderCatalogs();renderCapture();selectStep(1,false);
+
+</script>
+</body>
+</html>

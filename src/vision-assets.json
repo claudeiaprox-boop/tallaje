@@ -1,0 +1,16 @@
+{
+  "package": "@mediapipe/tasks-vision",
+  "version": "1.2.0",
+  "metadataSource": "https://unpkg.com/@mediapipe/tasks-vision@1.2.0/?meta",
+  "modelVersion": "pose_landmarker_lite/float16/1",
+  "files": [
+    { "path": "vision_bundle.mjs", "size": 156344, "integrity": "sha256-hw2lz8Q7/PKosPFOgVLa6MfnAXIuEZGw5ZK5S4G0Eno=", "url": "https://unpkg.com/@mediapipe/tasks-vision@1.2.0/vision_bundle.mjs" },
+    { "path": "wasm/vision_wasm_internal.js", "size": 334128, "integrity": "sha256-hcGjQr5wQnmH+QCWml8m4XVXNRERNk5lhel/sD6T4Qg=", "url": "https://unpkg.com/@mediapipe/tasks-vision@1.2.0/wasm/vision_wasm_internal.js" },
+    { "path": "wasm/vision_wasm_internal.wasm", "size": 14466654, "integrity": "sha256-vME98i09aeyMvo4oCYk1bYRK4A9FI+uCBy0khPRBNNw=", "url": "https://unpkg.com/@mediapipe/tasks-vision@1.2.0/wasm/vision_wasm_internal.wasm" },
+    { "path": "wasm/vision_wasm_module_internal.js", "size": 334166, "integrity": "sha256-YDhMkBR1AyHA/B1ImzMp5ertD888Mo1ATssabHXonRc=", "url": "https://unpkg.com/@mediapipe/tasks-vision@1.2.0/wasm/vision_wasm_module_internal.js" },
+    { "path": "wasm/vision_wasm_module_internal.wasm", "size": 14466676, "integrity": "sha256-LjJrnZWErCLiMMJj9H5v5pSn3xziKoVGxy3w5cD8EGY=", "url": "https://unpkg.com/@mediapipe/tasks-vision@1.2.0/wasm/vision_wasm_module_internal.wasm" },
+    { "path": "wasm/vision_wasm_nosimd_internal.js", "size": 333931, "integrity": "sha256-6bK3meDxB49VOLMApXg1uCN0LDfiZGMIoD8PJbOf3Nw=", "url": "https://unpkg.com/@mediapipe/tasks-vision@1.2.0/wasm/vision_wasm_nosimd_internal.js" },
+    { "path": "wasm/vision_wasm_nosimd_internal.wasm", "size": 12915401, "integrity": "sha256-7V5eWBJJC9kNakQCkIRf+eTFFvaWhHoooMDgVzRw1Gk=", "url": "https://unpkg.com/@mediapipe/tasks-vision@1.2.0/wasm/vision_wasm_nosimd_internal.wasm" },
+    { "path": "pose_landmarker_lite.task", "size": 5777746, "sha256": "59929e1d1ee95287735ddd833b19cf4ac46d29bc7afddbbf6753c459690d574a", "url": "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task" }
+  ]
+}

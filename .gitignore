@@ -1,0 +1,10 @@
+node_modules/
+.firebase/
+firebase-debug.log*
+ui-debug.log*
+*-debug.log*
+.env
+.env.*
+!.env.example
+public/
+tmp/
