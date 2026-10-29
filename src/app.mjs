@@ -1,11 +1,12 @@
 import { measurePhoto, recommendSize, parseCatalogCsv, requiredFieldsFor } from './engine.mjs';
 import { summarizeRepeated, evaluateFit, ellipseCircumference } from './fit.mjs';
+import { BODY_LANDMARKS, POSE_CONNECTIONS, mapPoseToPhoto } from './landmarks.mjs';
 import { CATALOGS, SOURCES } from './catalogs.mjs';
 
 const $ = id => document.getElementById(id);
 const canvas = $('canvas'), ctx = canvas.getContext('2d'), video = $('video'), overlay = $('liveOverlay'), overlayCtx = overlay.getContext('2d');
 const state = { garment: 'shirt', step: 1, view: 'front', photos: {}, measurements: {}, catalogId: 'eci-nino', customCatalogs: [], demo: false, repeats: {}, ease: {} };
-let stream = null, cameraToken = 0, imageToken = 0, assistant = null, assistToken = 0, pose = null, poseAt = 0, poseExpiry = null, assistLoading = false, dragging = false, pointerMoved = false, activePoint = 'top', dragKey = null;
+let stream = null, cameraToken = 0, imageToken = 0, assistant = null, assistToken = 0, pose = null, poseAt = 0, poseExpiry = null, assistLoading = false, dragging = false, pointerMoved = false, activePoint = 'top', dragKey = null, activeAiPoint = 11, recognitionController = null, recognitionRun = 0, assistantController = null;
 const GARMENT_DATA = {
  shirt: { name: 'Camisa', description: 'Pecho, hombros y manga', needed: 'Contorno de pecho. Revisa además cuello, manga y largo según el modelo.', icon: '<path d="m22 13-13 8 9 15 8-5v31h30V31l8 5 9-15-13-8-11-3-7 9-7-9-13 3Z"/><path d="m35 10 7 9-8 7-8-13m23-3-7 9 8 7 8-13M42 24v38"/>' },
  pants: { name: 'Pantalón', description: 'Cintura, cadera y pierna', needed: 'Contornos de cintura y cadera. Verifica entrepierna y largo por separado.', icon: '<path d="M22 10h40l5 54H48l-6-32-6 32H17l5-54Z"/><path d="M21 20h42M42 11v21m-18-11-4 11m39-11 4 11"/>' },
@@ -63,7 +64,7 @@ function pointKeys(view=state.view) {
 function status(text, error = false) { $('cameraStatus').textContent = text; $('cameraStatus').classList.toggle('error', error); }
 function announce(text) { $('globalStatus').textContent = text; }
 function selectStep(step, focus = true) {
- if (step !== 3) stopCamera();
+ if (step !== 3) { imageToken++; stopCamera(); }
  state.step = Math.max(1, Math.min(5, step));
  for (let i=1;i<=5;i++) $('step'+i).hidden = i !== state.step;
  for (const button of $('steps').children) { if (Number(button.dataset.step) === state.step) button.setAttribute('aria-current','step'); else button.removeAttribute('aria-current'); }
@@ -93,7 +94,7 @@ function renderViews() {
  $('assistButton').disabled=isFoot()||state.view!=='front';
  if(isFoot()) $('assistStatus').textContent='Para pies se usa referencia física y revisión manual; el detector corporal no mide calzado.';
  else if(state.view==='side') $('assistStatus').textContent='La asistencia de postura está disponible en la vista frontal. Revisa la lateral manualmente.';
- else if(!assistant) $('assistStatus').textContent='Opcional. Primera carga de unos 20 MB. Google MediaPipe se ejecuta aquí; las fotos no se envían a servidores.';
+ else if(!assistant) $('assistStatus').textContent='IA local · Google MediaPipe Pose. La primera carga necesita conexión; las fotos se procesan aquí.';
  $('empty').querySelector('h3').textContent=isFoot()?'Encuadra el pie y la referencia':'La guía está lista';
 }
 function renderCapture() {
@@ -101,18 +102,67 @@ function renderCapture() {
  $('captureSubtitle').textContent=isFoot()?'Captura cada pie desde arriba junto al segmento de referencia. Comprueba la medida con regla.':'La silueta orienta el encuadre. Ajusta su ancho como ayuda visual; no define el cuerpo de una talla.';
  $('empty').hidden=!!photo||!!stream; canvas.hidden=!photo||!!stream; video.hidden=!stream; overlay.hidden=!stream;
  $('captureAction').hidden=!stream;$('stopCamera').hidden=!stream;
- $('captureMode').textContent=stream?'CÁMARA EN VIVO':photo?(photo.demo?'EJEMPLO FICTICIO':'FOTO · MARCADO MANUAL'):'SIN CAPTURA';
+ $('captureMode').textContent=stream?'CÁMARA EN VIVO':photo?(photo.demo?'EJEMPLO FICTICIO':'FOTO · REVISIÓN DE PUNTOS'):'SIN CAPTURA';
  if(photo&&!stream){canvas.width=photo.source.width;canvas.height=photo.source.height;}
- renderPointControls();drawPhoto();renderPhotoResults();
+ renderPointControls();renderRecognition();drawPhoto();renderPhotoResults();
 }
 function renderPointControls() {
  const photo=currentPhoto(), keys=pointKeys(); if(!keys.includes(activePoint))activePoint=keys[0];
  $('pointToolbar').hidden=!photo||!!stream;
- $('photoPoint').replaceChildren(...keys.map((key,index)=>{const option=node('option',`${photo?.points[key]?'✓ ':''}${index+1}. ${POINTS[key][0]}`);option.value=key;return option;}));
+ $('photoPoint').replaceChildren(...keys.map((key,index)=>{const origin=photo?.origins?.[key]||'';const option=node('option',`${photo?.points[key]?'✓ ':''}${index+1}. ${POINTS[key][0]}${origin==='ai'?' · IA, revisar':''}`);option.value=key;option.dataset.origin=origin;return option;}));
  $('photoPoint').value=activePoint;
  const marked=keys.filter(key=>photo?.points[key]).length;
  $('pointInstruction').textContent=`${marked}/${keys.length} puntos · ${POINTS[activePoint][1]}`;
  $('resetPoints').disabled=!photo||!!stream;$('undoPoint').disabled=!photo?.history.length||!!stream;
+}
+function drawDetectedPose(context,landmarks,width,height,highlight){
+ if(!Array.isArray(landmarks))return;
+ const unit=Math.max(width,height)/700;
+ context.save();context.strokeStyle='#38bdf8';context.lineWidth=2*unit;context.setLineDash([]);
+ for(const [a,b]of POSE_CONNECTIONS){const p=landmarks[a],q=landmarks[b];if(!p||!q)continue;context.beginPath();context.moveTo(p.x*width,p.y*height);context.lineTo(q.x*width,q.y*height);context.stroke();}
+ for(const item of BODY_LANDMARKS){const p=landmarks[item.index];if(!p)continue;const selected=highlight&&item.index===activeAiPoint;context.beginPath();context.arc(p.x*width,p.y*height,(selected?7:3.5)*unit,0,Math.PI*2);context.fillStyle=selected?'#ffcf50':'#38bdf8';context.fill();context.strokeStyle='#102b46';context.lineWidth=unit;context.stroke();}
+ context.restore();
+}
+function renderAiPointHelp(){
+ const photo=currentPhoto(),item=BODY_LANDMARKS.find(p=>p.index===activeAiPoint),p=photo?.ai?.landmarks?.[activeAiPoint];
+ $('aiPointHelp').textContent=item?(p?`${item.label}: detectado. Es un punto anatómico aproximado; revisa su posición en la foto.`:`${item.label}: no se detectó con visibilidad suficiente. Prueba con mejor luz o una toma más clara.`):'';
+}
+function renderRecognition(){
+ const photo=currentPhoto(),info=photo?.recognition;
+ $('recognizePhoto').disabled=!photo||!!stream||isFoot()||photo.demo;
+ $('recognizePhoto').textContent=recognitionController?'Cancelar análisis':'Reconocer puntos con IA';
+ $('recognitionStatus').dataset.state=info?.state||'idle';
+ $('recognitionStatus').textContent=isFoot()?'El modelo corporal no detecta el contorno preciso del pie. Usa la referencia y el marcado para calzado.':info?.text||'Captura o carga una foto corporal. La IA marcará los puntos visibles.';
+ $('aiHostingLink').hidden=location.protocol!=='file:';
+ const ai=photo?.ai;$('landmarkSummary').textContent=ai?.count===1?`${ai.visibleCount} de 33 puntos corporales visibles · MediaPipe Pose`:'';
+ $('aiPointSelect').disabled=!ai||ai.count!==1;
+ $('aiPointSelect').replaceChildren(...BODY_LANDMARKS.map(item=>{const option=node('option',`${ai?.landmarks?.[item.index]?'✓ ':'○ '}${item.label}`);option.value=String(item.index);return option;}));
+ $('aiPointSelect').value=String(activeAiPoint);renderAiPointHelp();
+}
+function cancelRecognition(){
+ recognitionRun++;if(recognitionController){recognitionController.abort();recognitionController=null;const photo=currentPhoto();if(photo?.recognition?.state==='loading')photo.recognition={state:'idle',text:'Análisis detenido. Puedes volver a reconocer puntos o marcarlos manualmente.'};}
+ renderRecognition();
+}
+async function recognizeCurrentPhoto(){
+ const photo=currentPhoto(),view=state.view,garment=state.garment;if(!photo||stream||isFoot()||photo.demo||state.step!==3)return;
+ cancelRecognition();
+ if(location.protocol==='file:'){photo.recognition={state:'unavailable',text:'La detección IA necesita la versión HTTPS con conexión para cargar el modelo. Puedes seguir con el marcado manual.'};renderRecognition();return;}
+ const controller=new AbortController(),run=++recognitionRun;recognitionController=controller;
+ const valid=()=>run===recognitionRun&&!controller.signal.aborted&&currentPhoto()===photo&&state.view===view&&state.garment===garment&&state.step===3;
+ photo.recognition={state:'loading',text:'Cargando el modelo corporal y reconociendo puntos en esta foto…'};renderRecognition();
+ try{
+  const {detectPhotoPose}=await import('/photo-vision.mjs');if(!valid())return;
+  const output=await detectPhotoPose({image:photo.source,signal:controller.signal,onStatus:text=>{if(valid()){photo.recognition.text=text;renderRecognition();}}});if(!valid())return;
+  const mapped=mapPoseToPhoto({landmarks:output.landmarks,width:photo.source.width,height:photo.source.height,view});
+  snapshotPoints();
+  for(const key of Object.keys(photo.origins))if(photo.origins[key]==='ai'){delete photo.points[key];delete photo.origins[key];}
+  let added=0;for(const [key,point]of Object.entries(mapped.points)){if(!pointKeys(view).includes(key)||photo.origins[key]==='manual')continue;photo.points[key]=point;photo.origins[key]='ai';added++;}
+  photo.ai=mapped;$('multiviewAccepted').checked=false;
+  photo.recognition={state:mapped.count===0?'empty':mapped.count>1?'multiple':'ready',text:mapped.count===0?'No se detectó una persona. Incluye el cuerpo, mejora la luz y vuelve a intentarlo.':mapped.count>1?'Hay más de una persona. Usa una foto con una sola persona para proponer puntos.':`La IA detectó ${mapped.visibleCount} de 33 puntos visibles y propuso ${added} apoyos de medición. Revisa las articulaciones; completa coronilla, suelo y bordes manualmente.`};
+  activePoint=pointKeys().find(key=>!photo.points[key])||pointKeys()[0];
+  renderPointControls();drawPhoto();renderPhotoResults();
+ }catch(error){if(!valid())return;photo.recognition={state:'error',text:'No se pudo completar la detección IA. Comprueba la conexión o inténtalo de nuevo. El marcado manual sigue disponible.'};}
+ finally{if(run===recognitionRun){recognitionController=null;renderRecognition();}}
 }
 function photoMeasurement(photo=currentPhoto(), view=state.view) {
  if(!photo)return {measures:[],warnings:[],errors:[]};
@@ -148,7 +198,8 @@ function renderPhotoResults() {
  if(stream){target.append(node('p','Captura una foto para marcar y calcular.','hint'));return;}
  if(!photo){target.append(node('p','Aparecerán al calibrar y marcar los puntos.','hint'));return;}
  const missing=pointKeys().filter(key=>!photo.points[key]);
- if(missing.length){target.append(node('p',`Faltan ${missing.length} puntos de esta vista. ${isFoot()?'La referencia física debe estar en el mismo plano.':'Comprueba la estatura en Preparación.'}`,'hint'));return;}
+ if(missing.length)target.append(node('p',`Faltan ${missing.length} apoyos para completar esta vista. ${isFoot()?'La referencia física debe estar en el mismo plano.':'Confirma coronilla y suelo; los contornos requieren marcar sus bordes.'}`,'hint'));
+ if(!isFoot()&&(!photo.points.top||!photo.points.bottom))return;
  const output=photoMeasurement(photo);
  for(const measure of output.measures){const row=node('div',undefined,'photo-row');row.append(node('span',measure.label),node('strong',`≈ ${format(isFoot()?measure.value:Math.round(measure.value))} cm`));target.append(row);}
  if(!output.measures.length)target.append(node('p','Revisa los puntos o la calibración.','hint'));
@@ -156,7 +207,7 @@ function renderPhotoResults() {
 }
 function drawPhoto() {
  const photo=currentPhoto();if(!photo||stream)return;const {source,points}=photo;
- ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(source,0,0);const u=Math.max(canvas.width,canvas.height)/700;
+ ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(source,0,0);if($('showAiPoints').checked&&photo.ai?.landmarks)drawDetectedPose(ctx,photo.ai.landmarks,canvas.width,canvas.height,true);const u=Math.max(canvas.width,canvas.height)/700;
  const segments=isFoot()?[['refA','refB'],['heel','toe'],['footL','footR']]:state.view==='side'?[['top','bottom'],['chestFront','chestBack'],['waistFront','waistBack'],['hipFront','hipBack']]:[['top','bottom'],['shoulderL','shoulderR'],['chestL','chestR'],['waistL','waistR'],['hipL','hipR'],['shoulderR','elbow'],['elbow','wrist'],['crotch','bottom']];
  const keys=pointKeys();
  for(const [a,b]of segments){if(!points[a]||!points[b]||!keys.includes(a)||!keys.includes(b))continue;ctx.beginPath();ctx.moveTo(points[a].x,points[a].y);ctx.lineTo(points[b].x,points[b].y);ctx.lineWidth=2*u;ctx.strokeStyle=a==='refA'?'#ffcf50':'#45d9c7';ctx.setLineDash(a==='top'?[6*u,5*u]:[]);ctx.stroke();}
@@ -180,14 +231,16 @@ function drawOverlay() {
   else{const half=Math.min(W*spread/2,bodyH*.23);d.beginPath();d.ellipse(center,top+bodyH*.08,bodyH*.045,bodyH*.075,0,0,Math.PI*2);d.moveTo(center-half*.75,top+bodyH*.23);d.lineTo(center-half*.47,top+bodyH*.18);d.lineTo(center+half*.47,top+bodyH*.18);d.lineTo(center+half*.75,top+bodyH*.23);d.lineTo(center+half,top+bodyH*.55);d.moveTo(center-half*.75,top+bodyH*.23);d.lineTo(center-half,top+bodyH*.55);d.moveTo(center-half*.47,top+bodyH*.21);d.lineTo(center-half*.35,top+bodyH*.5);d.lineTo(center-half*.46,top+bodyH*.61);d.lineTo(center-half*.38,bottom);d.moveTo(center+half*.47,top+bodyH*.21);d.lineTo(center+half*.35,top+bodyH*.5);d.lineTo(center+half*.46,top+bodyH*.61);d.lineTo(center+half*.38,bottom);d.moveTo(center,top+bodyH*.61);d.lineTo(center-half*.12,bottom);d.moveTo(center,top+bodyH*.61);d.lineTo(center+half*.12,bottom);d.stroke();}
  }
  if(pose?.landmarks?.[0]&&!isFoot()){
-  const landmarks=pose.landmarks[0];d.strokeStyle='#80d8ff';d.lineWidth=2*unit;for(const [a,b]of [[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28]]){const p=landmarks[a],q=landmarks[b];if(!p||!q||(p.visibility??1)<.6||(q.visibility??1)<.6)continue;d.beginPath();d.moveTo(p.x*W,p.y*H);d.lineTo(q.x*W,q.y*H);d.stroke();}for(const i of [11,12,13,14,15,16,23,24,25,26,27,28]){const p=landmarks[i];if(!p||(p.visibility??1)<.6)continue;d.beginPath();d.arc(p.x*W,p.y*H,4*unit,0,Math.PI*2);d.fillStyle='#d5efb7';d.fill();}
+  const mapped=mapPoseToPhoto({landmarks:pose.landmarks,width:W,height:H,view:state.view});
+  drawDetectedPose(d,mapped.landmarks,W,H,false);
  }
 }
+
 function canCapture(){return !!(stream&&video.videoWidth&&video.videoHeight&&video.readyState>=2&&!assistLoading&&(!assistant||(pose?.quality.ready&&performance.now()-poseAt<700)));}
 function updateCaptureReadiness(){const ready=canCapture();$('capture').disabled=!ready;$('captureReadiness').textContent=assistLoading?'Preparando controles de postura…':assistant?(ready?'Postura estable para capturar. Comprueba visualmente coronilla y plantas.':'Espera a tener postura estable y todos los controles de encuadre. Puedes detener el asistente y revisar manualmente.'):'Captura manual: comprueba cabeza, pies y postura.';}
-function disposeAssistant() { assistToken++;clearTimeout(poseExpiry);poseAt=0;assistLoading=false; if(assistant)assistant.dispose();assistant=null;pose=null;$('poseChecks').hidden=true;$('assistButton').textContent='Activar asistente de Google';$('assistButton').disabled=isFoot()||state.view!=='front';updateCaptureReadiness(); }
+function disposeAssistant() { assistToken++;assistantController?.abort();assistantController=null;clearTimeout(poseExpiry);poseAt=0;assistLoading=false; if(assistant)assistant.dispose();assistant=null;pose=null;$('poseChecks').hidden=true;$('assistButton').textContent='Activar detección en vivo';$('assistButton').disabled=isFoot()||state.view!=='front';updateCaptureReadiness(); }
 function stopCamera() {
- cameraToken++;if(stream)stream.getTracks().forEach(track=>track.stop());stream=null;video.srcObject=null;video.hidden=true;overlay.hidden=true;$('captureAction').hidden=true;$('stopCamera').hidden=true;$('capture').disabled=true;$('startCamera').disabled=false;$('facing').disabled=false;disposeAssistant();
+ cancelRecognition();cameraToken++;if(stream)stream.getTracks().forEach(track=>track.stop());stream=null;video.srcObject=null;video.hidden=true;overlay.hidden=true;$('captureAction').hidden=true;$('stopCamera').hidden=true;$('capture').disabled=true;$('startCamera').disabled=false;$('facing').disabled=false;disposeAssistant();
  if(state.step===3)renderCapture();
 }
 function leaveDemo() { if(!state.demo)return;state.demo=false;state.photos={};state.measurements={};state.repeats={};state.ease={};$('multiviewAccepted').checked=false;$('height').value='';$('reference').value='20';$('confirmed').checked=false;$('referenceAccepted').checked=false;$('demoBanner').hidden=true;renderMeasureFields(); }
@@ -200,29 +253,33 @@ async function startCamera() {
   if(token!==cameraToken){next.getTracks().forEach(track=>track.stop());return;}
   stream=next;video.srcObject=stream;$('facing').disabled=true;renderCapture();await video.play();if(token!==cameraToken)return;
   updateCaptureReadiness();drawOverlay();status('Revisa cabeza y pies completos, o el pie y su referencia. La silueta es una ayuda de encuadre.');
+  if($('autoRecognize').checked&&!isFoot()&&state.view==='front')void enableAssistant();
  }catch(error){if(token!==cameraToken)return;stopCamera();const reasons={NotAllowedError:'No se concedió permiso de cámara. Puedes revisarlo en el navegador o cargar una foto.',NotFoundError:'No se encontró una cámara. Usa Cargar foto.',NotReadableError:'La cámara está ocupada. Cierra otras apps que la usen o carga una foto.'};status(reasons[error.name]||'No se pudo iniciar la cámara. Usa un navegador con HTTPS o carga una foto.',true);}
 }
 function setPhoto(image,{demo=false,points={},view=state.view,framing='Foto cargada o ejemplo; sin control automático de captura.'}={}) {
  stopCamera();const w=image.naturalWidth||image.width,h=image.naturalHeight||image.height,ratio=Math.min(1,1600/Math.max(w,h));
  const source=document.createElement('canvas');source.width=Math.round(w*ratio);source.height=Math.round(h*ratio);source.getContext('2d').drawImage(image,0,0,source.width,source.height);
  $('multiviewAccepted').checked=false;
- state.photos[view]={source,points:Object.fromEntries(Object.entries(points).map(([key,p])=>[key,{x:p.x*ratio,y:p.y*ratio}])),history:[],demo,framing};
- activePoint=pointKeys()[0];renderCapture();status('Foto lista. Marca los puntos en el orden indicado y comprueba la calibración.');
+ state.photos[view]={source,points:Object.fromEntries(Object.entries(points).map(([key,p])=>[key,{x:p.x*ratio,y:p.y*ratio}])),origins:Object.fromEntries(Object.keys(points).map(key=>[key,'manual'])),ai:null,recognition:{state:'idle',text:demo?'Ejemplo dibujado: la detección se prueba con una foto real.':'Foto lista para detectar puntos corporales.'},history:[],demo,framing};
+ activePoint=pointKeys()[0];renderCapture();status('Foto lista. La IA puede proponer articulaciones; revisa los apoyos y la calibración.');
+ if($('autoRecognize').checked&&!isFoot()&&!demo)void recognizeCurrentPhoto();
 }
 async function enableAssistant(){
  if(!stream){$('assistStatus').textContent='Activa primero la cámara para usar la guía automática.';return;}
+ if(assistLoading){disposeAssistant();$('assistStatus').textContent='Carga de IA cancelada. Puedes continuar manualmente.';return;}
  if(assistant){disposeAssistant();drawOverlay();$('assistStatus').textContent='Asistente detenido. Puedes seguir con la silueta y el marcado manual.';return;}
  if(location.protocol==='file:'){$('assistStatus').textContent='El asistente requiere la versión HTTPS. El marcado manual del HTML funciona sin conexión.';return;}
- const token=++assistToken;assistLoading=true;updateCaptureReadiness();$('assistButton').disabled=true;$('assistStatus').textContent='Preparando MediaPipe en este dispositivo…';
+ const token=++assistToken,controller=new AbortController();assistantController=controller;assistLoading=true;updateCaptureReadiness();$('assistButton').disabled=false;$('assistButton').textContent='Cancelar carga de IA';$('assistStatus').textContent='Preparando MediaPipe en este dispositivo…';
  try{
   const {createPoseAssistant}=await import('/vision.mjs');
-  const next=await createPoseAssistant({video,onStatus:message=>{if(token===assistToken){$('assistStatus').textContent=message;if(message.includes('no disponible')){disposeAssistant();updateCaptureReadiness();}}},onResult:result=>{if(token!==assistToken||!stream)return;pose=result;poseAt=result.capturedAt;clearTimeout(poseExpiry);poseExpiry=setTimeout(()=>{pose=null;poseAt=0;$('poseChecks').hidden=true;$('assistStatus').textContent='Revisión de postura caducada; espera un nuevo cuadro o continúa manualmente.';updateCaptureReadiness();drawOverlay();},Math.max(0,700-(performance.now()-poseAt)));updateCaptureReadiness();drawOverlay();$('assistStatus').textContent=result.message;$('poseChecks').hidden=false;const labels={person:'Una persona',centered:'Centrado',fullBody:'Puntos visibles',framing:'Tamaño en cuadro',level:'Hombros nivelados',hips:'Caderas niveladas',frontal:'Frente aproximado',arms:'Brazos separados',stable:'Postura estable'};$('poseChecks').replaceChildren(...Object.entries(labels).map(([key,label])=>node('span',`${result.checks[key]?'✓':'○'} ${label}`,`check-chip${result.checks[key]?' ok':''}`)));}});
+  if(token!==assistToken||!stream||controller.signal.aborted)return;
+  const next=await createPoseAssistant({video,signal:controller.signal,onStatus:message=>{if(token===assistToken){$('assistStatus').textContent=message;if(message.includes('no disponible')){disposeAssistant();updateCaptureReadiness();}}},onResult:result=>{if(token!==assistToken||!stream)return;pose=result;poseAt=result.capturedAt;clearTimeout(poseExpiry);poseExpiry=setTimeout(()=>{pose=null;poseAt=0;$('poseChecks').hidden=true;$('assistStatus').textContent='Revisión de postura caducada; espera un nuevo cuadro o continúa manualmente.';updateCaptureReadiness();drawOverlay();},Math.max(0,700-(performance.now()-poseAt)));updateCaptureReadiness();drawOverlay();$('assistStatus').textContent=result.message;$('poseChecks').hidden=false;const labels={person:'Una persona',centered:'Centrado',fullBody:'Puntos visibles',framing:'Tamaño en cuadro',level:'Hombros nivelados',hips:'Caderas niveladas',frontal:'Frente aproximado',arms:'Brazos separados',stable:'Postura estable'};$('poseChecks').replaceChildren(...Object.entries(labels).map(([key,label])=>node('span',`${result.checks[key]?'✓':'○'} ${label}`,`check-chip${result.checks[key]?' ok':''}`)));}});
   if(token!==assistToken||!stream){next.dispose();return;}assistant=next;assistLoading=false;updateCaptureReadiness();assistant.start();$('assistButton').disabled=false;$('assistButton').textContent='Detener asistente';
  }catch(error){if(token!==assistToken)return;assistLoading=false;updateCaptureReadiness();$('assistStatus').textContent='No se pudo preparar el asistente. La cámara y el marcado manual siguen disponibles.';$('assistButton').disabled=false;}
 }
 function eventPoint(event){const rect=canvas.getBoundingClientRect();return {x:Math.max(0,Math.min(canvas.width,(event.clientX-rect.left)*canvas.width/rect.width)),y:Math.max(0,Math.min(canvas.height,(event.clientY-rect.top)*canvas.height/rect.height))};}
-function snapshotPoints(){const photo=currentPhoto();if(!photo)return;photo.history.push(structuredClone(photo.points));if(photo.history.length>35)photo.history.shift();}
-function updatePoint(point){$('multiviewAccepted').checked=false;const photo=currentPhoto();if(!photo||stream)return;photo.points[dragKey||activePoint]=point;renderPointControls();drawPhoto();drawLoupe(point);renderPhotoResults();}
+function snapshotPoints(){const photo=currentPhoto();if(!photo)return;photo.history.push({points:structuredClone(photo.points),origins:{...photo.origins}});if(photo.history.length>35)photo.history.shift();}
+function updatePoint(point){$('multiviewAccepted').checked=false;const photo=currentPhoto();if(!photo||stream)return;photo.points[dragKey||activePoint]=point;photo.origins[dragKey||activePoint]='manual';renderPointControls();drawPhoto();drawLoupe(point);renderPhotoResults();}
 function repeatSummary(key) { return summarizeRepeated(state.repeats[key]||[],{maxSpread:isFoot()?.3:1}); }
 function syncRepeated(key) {
  const summary=repeatSummary(key);state.measurements[key]=summary.status==='ready'?String(summary.value):'';
@@ -294,11 +351,11 @@ function renderRecommendation(){
  $('reviewWarnings').replaceChildren(...warnings.map(text=>node('p',text)));
 }
 function reportText(){
- const output=recommendation(),catalog=getCatalog(),lines=['TALLALAB 2.1 — INFORME ORIENTATIVO',state.demo?'EJEMPLO FICTICIO. NO CORRESPONDE A UNA PERSONA.':'Sesión de prueba; datos introducidos por el usuario.',`Fecha: ${new Date().toLocaleString('es-GT')}`,`Prenda: ${GARMENT_DATA[state.garment].name}`,`Referencia: ${catalog?.name||'Sin tabla'}`,`Fuente: ${catalog?.source||'Tabla importada por el usuario'}`,`Estado: ${output.stability.status==='boundary'?'boundary':output.status}`,`Talla de referencia: ${output.stability.status==='boundary'?'Sin talla estable; referencia central '+(output.size||'fuera de tabla'):output.size||'No se asigna'}`,`Tipo de tabla: ${catalog?.kind||'sin tabla'}`,`Método: ${$('measurementMode').value==='repeat'?'Tres lecturas independientes':'Una lectura'}`,'','MEDIDAS INTRODUCIDAS (cm)'];
+ const output=recommendation(),catalog=getCatalog(),lines=['TALLALAB 2.2 — INFORME ORIENTATIVO',state.demo?'EJEMPLO FICTICIO. NO CORRESPONDE A UNA PERSONA.':'Sesión de prueba; datos introducidos por el usuario.',`Fecha: ${new Date().toLocaleString('es-GT')}`,`Prenda: ${GARMENT_DATA[state.garment].name}`,`Referencia: ${catalog?.name||'Sin tabla'}`,`Fuente: ${catalog?.source||'Tabla importada por el usuario'}`,`Estado: ${output.stability.status==='boundary'?'boundary':output.status}`,`Talla de referencia: ${output.stability.status==='boundary'?'Sin talla estable; referencia central '+(output.size||'fuera de tabla'):output.size||'No se asigna'}`,`Tipo de tabla: ${catalog?.kind||'sin tabla'}`,`Método: ${$('measurementMode').value==='repeat'?'Tres lecturas independientes':'Una lectura'}`,'','MEDIDAS INTRODUCIDAS (cm)'];
  for(const [key,value]of Object.entries(state.measurements))if(value&&FIELDS[key])lines.push(`${FIELDS[key][0]}: ${value}`);
  for(const key of requiredFieldsFor(state.garment)){if($('measurementMode').value==='repeat'){const r=repeatSummary(key);lines.push(`${FIELDS[key][0]} · lecturas: ${(state.repeats[key]||[]).join(', ')}; estado ${r.status}; rango observado ${r.range?.join(' a ')||'pendiente'} cm.`);}}
  lines.push(`Estabilidad de referencia: ${output.stability.status}; tallas candidatas: ${output.stability.sizes.join(', ')||'sin determinar'}`,`Verificación declarada con cinta o regla: ${$('confirmed').checked?'sí':'pendiente'}`,`Referencia aceptada: ${$('referenceAccepted').checked?'sí':'pendiente'}`,'','APOYO FOTOGRÁFICO: ESTIMACIONES');
- for(const [view,photo]of Object.entries(state.photos)){const result=photoMeasurement(photo,view);lines.push(`Vista: ${view}`,`Encuadre: ${photo.framing||'Manual'}`);for(const measure of result.measures)lines.push(`${measure.label}: aprox. ${format(measure.value)} cm`);for(const error of result.errors)lines.push(`Revisar: ${error}`);}
+ for(const [view,photo]of Object.entries(state.photos)){const result=photoMeasurement(photo,view);lines.push(`Vista: ${view}`,`Encuadre: ${photo.framing||'Manual'}`,`Detección IA: ${photo.ai?.count===1?photo.ai.visibleCount+' de 33 puntos visibles':'sin detección única conservada'}`,`Apoyos propuestos por IA pendientes de corrección: ${Object.keys(photo.origins||{}).filter(key=>photo.origins[key]==='ai').map(key=>POINTS[key]?.[0]||key).join(', ')||'ninguno'}`);for(const measure of result.measures)lines.push(`${measure.label}: aprox. ${format(measure.value)} cm`);for(const error of result.errors)lines.push(`Revisar: ${error}`);}
  lines.push('','COMPARACIÓN',...output.details,...output.warnings,'','LÍMITES','No existe una tabla universal de tallas. Se utiliza la primera referencia nominal igual o mayor en todas las dimensiones necesarias; es una regla del prototipo y no un intervalo oficial. No se suma holgura automática.','En tablas de prenda se compara cuerpo + holgura mínima explícita del proveedor. Las repeticiones describen variación observada, no un intervalo de confianza ni exactitud validada.','La foto estima distancias visibles, no contornos corporales. MediaPipe orienta postura y encuadre; no certifica centímetros. La perspectiva, ropa y marcado afectan el resultado.','Sin precisión metrológica validada ni margen de error conocido. Verifica con cinta, tabla del proveedor y prueba de prenda; para zapatos mide ambos pies y comprueba el ancho.','Las fotos no se incluyen en este informe.');return lines.join('\r\n');
 }
 function downloadText(text,filename,type='text/plain;charset=utf-8'){const url=URL.createObjectURL(new Blob(['\ufeff',text],{type})),a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);}
@@ -311,7 +368,7 @@ function makeDemo(){
  d.fillStyle='#56708b';d.textAlign='center';d.font='16px system-ui';d.fillText('EJEMPLO FICTICIO · SIN DATOS REALES',300,785);
  state.view=isFoot()?'leftFoot':'front';setPhoto(source,{demo:true,points});renderMeasureFields();renderCatalogs();selectStep(3);status('Ejemplo ficticio. Puedes ajustar puntos, verificar las medidas de ejemplo y explorar el resultado.');
 }
-function newSession(){stopCamera();imageToken++;state.photos={};state.measurements={};state.repeats={};state.ease={};$('multiviewAccepted').checked=false;state.demo=false;state.view=isFoot()?'leftFoot':'front';$('height').value='';$('reference').value='20';$('measurementMode').value='repeat';$('confirmed').checked=false;$('referenceAccepted').checked=false;$('demoBanner').hidden=true;$('photoInput').value='';$('csvStatus').textContent='';activePoint=pointKeys()[0];canvas.width=1;canvas.height=1;$('loupe').hidden=true;renderMeasureFields();renderCapture();selectStep(1);announce('Nueva sesión lista. Fotos y medidas anteriores descartadas.');}
+function newSession(){stopCamera();imageToken++;state.photos={};state.measurements={};state.repeats={};state.ease={};$('multiviewAccepted').checked=false;$('autoRecognize').checked=true;state.demo=false;state.view=isFoot()?'leftFoot':'front';$('height').value='';$('reference').value='20';$('measurementMode').value='repeat';$('confirmed').checked=false;$('referenceAccepted').checked=false;$('demoBanner').hidden=true;$('photoInput').value='';$('csvStatus').textContent='';activePoint=pointKeys()[0];canvas.width=1;canvas.height=1;$('loupe').hidden=true;renderMeasureFields();renderCapture();selectStep(1);announce('Nueva sesión lista. Fotos y medidas anteriores descartadas.');}
 
 for(const [key,data]of Object.entries(GARMENT_DATA)){const button=node('button',undefined,'garment-card');button.dataset.garment=key;button.setAttribute('aria-pressed',String(key===state.garment));const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');icon.setAttribute('viewBox','0 0 84 78');icon.setAttribute('fill','none');icon.setAttribute('stroke','currentColor');icon.setAttribute('stroke-width','2');icon.setAttribute('stroke-linejoin','round');icon.setAttribute('aria-hidden','true');icon.innerHTML=data.icon;button.append(icon,node('span',data.name,'garment-name'),node('span',data.description,'garment-description'));button.addEventListener('click',()=>setGarment(key));$('garments').append(button);}
 for(const button of $('steps').children)button.addEventListener('click',()=>selectStep(Number(button.dataset.step)));
@@ -334,8 +391,8 @@ canvas.addEventListener('pointerup',event=>{if(!dragging)return;updatePoint(even
 canvas.addEventListener('pointercancel',()=>{dragging=false;dragKey=null;$('loupe').hidden=true;});
 canvas.addEventListener('keydown',event=>{if(!currentPhoto()||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Enter'].includes(event.key))return;event.preventDefault();snapshotPoints();const p={...(currentPhoto().points[activePoint]||{x:canvas.width/2,y:canvas.height/2})},amount=(event.shiftKey?10:1)*Math.max(canvas.width,canvas.height)/700;if(event.key==='ArrowLeft')p.x-=amount;if(event.key==='ArrowRight')p.x+=amount;if(event.key==='ArrowUp')p.y-=amount;if(event.key==='ArrowDown')p.y+=amount;p.x=Math.max(0,Math.min(canvas.width,p.x));p.y=Math.max(0,Math.min(canvas.height,p.y));updatePoint(p);});
 canvas.addEventListener('blur',()=>{$('loupe').hidden=true;});
-$('undoPoint').addEventListener('click',()=>{const photo=currentPhoto();if(!photo?.history.length)return;photo.points=photo.history.pop();$('multiviewAccepted').checked=false;renderPointControls();drawPhoto();renderPhotoResults();});
-$('resetPoints').addEventListener('click',()=>{if(!currentPhoto())return;snapshotPoints();currentPhoto().points={};$('multiviewAccepted').checked=false;activePoint=pointKeys()[0];renderPointControls();drawPhoto();renderPhotoResults();});
+$('undoPoint').addEventListener('click',()=>{const photo=currentPhoto();if(!photo?.history.length)return;const previous=photo.history.pop();photo.points=previous.points;photo.origins=previous.origins;$('multiviewAccepted').checked=false;renderPointControls();drawPhoto();renderPhotoResults();});
+$('resetPoints').addEventListener('click',()=>{if(!currentPhoto())return;cancelRecognition();snapshotPoints();currentPhoto().points={};currentPhoto().origins={};$('multiviewAccepted').checked=false;activePoint=pointKeys()[0];renderPointControls();drawPhoto();renderPhotoResults();});
 $('height').addEventListener('input',()=>{$('multiviewAccepted').checked=false;renderPhotoResults();});$('reference').addEventListener('input',renderPhotoResults);
 $('catalog').addEventListener('change',()=>{state.catalogId=$('catalog').value;$('referenceAccepted').checked=false;renderCatalogDetails();});
 $('csvTemplate').addEventListener('click',()=>{const rows=isFoot()?'talla,pecho,cintura,cadera,pie_cm\r\nEJEMPLO_1,,,,18.5\r\nEJEMPLO_2,,,,19.3':'talla,pecho,cintura,cadera,pie_cm\r\nEJEMPLO_1,68,65,76,\r\nEJEMPLO_2,74,69,81,';downloadText(rows,'TallaLab-plantilla-tabla.csv','text/csv;charset=utf-8');});
@@ -347,4 +404,8 @@ for(const id of ['sourcesButton','limitationsButton'])$(id).addEventListener('cl
 window.addEventListener('pagehide',stopCamera);document.addEventListener('visibilitychange',()=>{if(document.hidden)stopCamera();});
 $('measurementMode').addEventListener('change',()=>{$('confirmed').checked=false;renderMeasureFields();});
 $('multiviewAccepted').addEventListener('change',renderMultiview);
+$('recognizePhoto').addEventListener('click',()=>{if(recognitionController)cancelRecognition();else void recognizeCurrentPhoto();});
+$('autoRecognize').addEventListener('change',()=>{if(!$('autoRecognize').checked){cancelRecognition();if(assistant||assistLoading){disposeAssistant();drawOverlay();$('assistStatus').textContent='Detección automática desactivada. Puedes trabajar manualmente.';}}else if(stream&&!isFoot()&&state.view==='front')void enableAssistant();else if(currentPhoto()&&!isFoot()&&!currentPhoto().demo)void recognizeCurrentPhoto();});
+$('showAiPoints').addEventListener('change',drawPhoto);
+$('aiPointSelect').addEventListener('change',()=>{activeAiPoint=Number($('aiPointSelect').value);renderAiPointHelp();drawPhoto();});
 renderPreparation();renderMeasureFields();renderCatalogs();renderCapture();selectStep(1,false);

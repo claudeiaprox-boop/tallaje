@@ -1,4 +1,4 @@
-# TallaLab 2.1
+# TallaLab 2.2
 
 Tallaje escolar guiado con cámara, marcado manual, verificación con cinta/regla y comparación con referencias comerciales identificadas. Proyecto Firebase: tallalab-pruebas-20261028.
 
@@ -74,3 +74,10 @@ Usa **Tres lecturas** en Verificación: retira y recoloca cinta/regla, revisa me
 Al importar CSV, selecciona medidas corporales o contornos de prenda terminada. Estos últimos requieren la holgura mínima indicada por el proveedor; no uses anchos planos como contornos. El laboratorio de frente/perfil es experimental y nunca decide talla. La asistencia de cámara comprueba postura y estabilidad, sin certificar centímetros.
 
 Consulta [Método y validación pendiente](METODO-PRECISION.md).
+
+
+## Reconocimiento automático (2.2)
+
+En Cámara deja activado **Detectar puntos automáticamente**. Al activar la cámara frontal aparece el esqueleto detectado; al capturar o cargar una foto, MediaPipe la analiza de nuevo y conserva sus puntos. Puedes seleccionar cualquiera de los 33 puntos para revisarlo y reanalizar con **Reconocer puntos con IA**. Las propuestas numeradas de hombros/codo/muñeca pueden arrastrarse. Las correcciones manuales sobreviven al reanálisis.
+
+El modelo estima articulaciones, no la identidad ni los contornos de confección. Completa coronilla, suelo y bordes necesarios antes de calcular distancias. Para prendas y zapatos mantiene la verificación física del método 2.1. El modelo se ejecuta en el navegador con los recursos del sitio HTTPS; si falla o se cancela, continúa manualmente.

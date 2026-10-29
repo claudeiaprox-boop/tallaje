@@ -3,9 +3,11 @@ import { createPoseQualityTracker } from './pose-quality.mjs';
 const FRAME_INTERVAL_MS = 1000 / 6;
 const INIT_TIMEOUT_MS = 30000;
 const FRAME_TIMEOUT_MS = 12000;
+const poseAbortError = () => Object.assign(new Error('Detección en vivo cancelada.'), { name: 'AbortError' });
 /** Optional local framing assistance. It produces no centimetres or body edges. */
-export async function createPoseAssistant({ video, onResult, onStatus, baseUrl = '/vendor/mediapipe/' }) {
+export async function createPoseAssistant({ video, onResult, onStatus, baseUrl = '/vendor/mediapipe/', signal }) {
   if (!video) throw new Error('Falta la vista de cámara para la guía.');
+  if (signal?.aborted) throw poseAbortError();
   if (typeof Worker !== 'function' || typeof createImageBitmap !== 'function') {
     throw new Error('La guía automática no está disponible en este navegador. Continúa con el marcado manual.');
   }
@@ -44,10 +46,18 @@ export async function createPoseAssistant({ video, onResult, onStatus, baseUrl =
     clearTimeout(initTimer);
     clearTimeout(frameTimer);
     inFlight = null;
+    signal?.removeEventListener('abort', abort);
     worker.onmessage = null;
     worker.onerror = null;
     worker.onmessageerror = null;
     worker.terminate();
+  };
+  const abort = () => {
+    if (!initSettled) {
+      initSettled = true;
+      initReject(poseAbortError());
+    }
+    cleanup();
   };
   const fail = (detail) => {
     const error = new Error(`La guía automática no está disponible. Continúa con el marcado manual. ${detail || ''}`.trim());
@@ -123,14 +133,20 @@ export async function createPoseAssistant({ video, onResult, onStatus, baseUrl =
   };
   worker.onerror = (event) => { event.preventDefault?.(); fail(event.message || 'No se pudo abrir el procesador de postura.'); };
   worker.onmessageerror = () => fail('No se pudo recibir la revisión de postura.');
-  status('Preparando guía de postura en este dispositivo…');
-  initTimer = setTimeout(() => fail('La preparación tardó más de 30 segundos.'), INIT_TIMEOUT_MS);
-  try {
-    const resolvedBase = new URL(baseUrl, document.baseURI);
-    if (!resolvedBase.pathname.endsWith('/')) resolvedBase.pathname += '/';
-    worker.postMessage({ type: 'init', baseUrl: resolvedBase.href });
-  } catch (error) {
-    fail(error?.message);
+  signal?.addEventListener('abort', abort, { once: true });
+  if (signal?.aborted) abort();
+  if (!disposed) {
+    status('Preparando guía de postura en este dispositivo…');
+    if (!disposed) {
+      initTimer = setTimeout(() => fail('La preparación tardó más de 30 segundos.'), INIT_TIMEOUT_MS);
+      try {
+        const resolvedBase = new URL(baseUrl, document.baseURI);
+        if (!resolvedBase.pathname.endsWith('/')) resolvedBase.pathname += '/';
+        worker.postMessage({ type: 'init', baseUrl: resolvedBase.href });
+      } catch (error) {
+        fail(error?.message);
+      }
+    }
   }
   await ready;
 

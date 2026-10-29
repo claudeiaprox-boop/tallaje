@@ -62,6 +62,8 @@ async function open(options = {}) {
   });
   await page.goto(offline ? offlineFile : base, { waitUntil: 'load' });
   await page.locator('#garments button').first().waitFor();
+  // These scenarios exercise the manual path; AI has its own recognition suite.
+  await page.evaluate(() => { document.querySelector('#autoRecognize').checked = false; });
   async function finish() {
     assert.deepEqual(pageErrors, [], 'uncaught browser errors');
     assert.deepEqual(policyErrors, [], 'content security policy violations');

@@ -1,6 +1,6 @@
-# TallaLab 2.1
+# TallaLab 2.2
 
-Prototipo de tallaje escolar guiado con cámara para **camisa, pantalón, falda y zapatos**. Combina siluetas de encuadre, fotografías, marcado manual con lupa y comparación con tablas de referencia identificadas.
+Prototipo de tallaje escolar guiado con cámara para **camisa, pantalón, falda y zapatos**. Combina detección automática con IA, siluetas de encuadre, fotografías y marcado corregible con lupa y comparación con tablas de referencia identificadas.
 
 **[Abrir la aplicación](https://tallalab-pruebas-20261028.web.app)** · [Descargar el HTML](https://tallalab-pruebas-20261028.web.app/TallaLab.html)
 
@@ -12,7 +12,7 @@ Prototipo de tallaje escolar guiado con cámara para **camisa, pantalón, falda 
 4. Revisar la tabla corporal o importar contornos completos de prenda terminada con la holgura mínima indicada por el proveedor.
 5. Consultar una talla orientativa y descargar o imprimir el informe.
 
-La asistencia opcional de Google MediaPipe orienta la postura mediante articulaciones. La superposición sobre la cámara es una guía visual; **no es un escáner corporal ni una implementación de WebXR**.
+El modelo preentrenado Google MediaPipe Pose Lite detecta hasta 33 puntos corporales. La detección arranca automáticamente al abrir la cámara frontal o cargar una foto corporal y puede desactivarse. La superposición sobre la cámara es una guía visual; **no es un escáner corporal ni una implementación de WebXR**.
 
 ## Precisión y privacidad
 
@@ -21,6 +21,16 @@ La asistencia opcional de Google MediaPipe orienta la postura mediante articulac
 - Para el pie se necesita una referencia física en el mismo plano y cámara perpendicular; confirmar la longitud con regla y probar ambos zapatos.
 - Las tablas de ECI y Clarks corresponden a esas marcas; no son estándares universales ni sustituyen la tabla del proveedor escolar. No se añade holgura automáticamente.
 - Las fotos y medidas permanecen en la memoria del navegador. No hay cuentas, almacenamiento remoto ni analítica; los informes se guardan por acción del usuario.
+
+## Reconocimiento automático (2.2)
+
+- Cámara frontal: la IA arranca automáticamente, muestra puntos y esqueleto y revisa postura/estabilidad. La carga puede cancelarse y existe recorrido manual.
+- Foto corporal: el modelo se ejecuta sobre el archivo o cuadro capturado exacto en modo IMAGE, no reutiliza articulaciones de un cuadro anterior.
+- Selector para revisar los 33 puntos. Se dibujan solo los puntos con visibilidad suficiente; cero o varias personas generan avisos y no propuestas arbitrarias.
+- En foto frontal se proponen hombros, codo y muñeca como apoyos corregibles. Los puntos de hombro son articulaciones aproximadas, no el extremo de una prenda. El perfil muestra esqueleto sin proponer bordes.
+- La IA nunca completa coronilla, suelo, cintura, cadera, pecho, entrepierna ni contornos. Esas referencias no están en el esquema del modelo y deben comprobarse con el método apropiado.
+- Los cambios manuales se conservan al reconocer de nuevo; los informes distinguen apoyos IA y manuales. La inferencia se cancela al abandonar la vista y las imágenes siguen en memoria local.
+- La IA usa el modelo local fijado en `src/vision-assets.json`, no requiere claves ni servicio externo. El HTML suelto ofrece marcado manual y enlaza al sitio HTTPS para usar IA.
 
 ## Mejoras de método (2.1)
 
@@ -60,6 +70,7 @@ npm run vision:verify
 npm install --no-save --package-lock=false playwright
 npm run test:ui
 npm run test:assistant
+npm run test:recognition
 ```
 
 Las pruebas de interfaz utilizan cámara simulada. El funcionamiento con cámara física y la precisión del tallaje requieren pruebas de campo.

@@ -57,3 +57,8 @@ La superposición sobre cámara y el asistente de postura son una guía visual i
 ## Método 2.1: criterios obligatorios
 
 Mantener separados el seguimiento AR, las estimaciones fotográficas, las medidas físicas y las dimensiones de prenda. El modo recomendado pide tres lecturas independientes y usa mediana/rango; solicita repetir si la dispersión supera el umbral operativo (1 cm corporal; 0,3 cm pie), sin llamarlo precisión o intervalo de confianza. Los extremos observados deben probarse contra el motor para exponer cambios de talla. Diferenciar tipo corporal/contorno prenda al importar; prenda necesita holgura mínima explícita del proveedor. No inferir comodidad, caída o elasticidad. La elipse de dos vistas es solo laboratorio sin conexión automática a medidas verificadas. El control de captura exige 8 cuadros estables y 1 segundo, usa puntos originales, y caduca con fotogramas antiguos; el suavizado es solo visual. Validar en escolares según METODO-PRECISION.md antes de prometer exactitud.
+
+
+## Reconocimiento IA 2.2
+
+Arrancar MediaPipe Pose automáticamente en cámara frontal y fotos corporales. Conservar hasta 33 articulaciones con visibilidad suficiente, mostrar esqueleto y permitir inspección. Inferir sobre la foto capturada exacta (IMAGE), nunca proyectar un resultado anterior del vídeo sobre otra imagen. Autocompletar solo apoyos articulares compatibles (hombros/codo/muñeca), conservar correcciones manuales al reanalizar y mantener el marcado de coronilla/suelo/bordes y los contornos físicos separados. Con cero o varias personas, no producir propuestas arbitrarias. Cancelar carga/inferencia al cambiar sesión/vista y liberar recursos inmediatamente, incluidos bitmaps que llegan tarde. No identificar personas ni enviar fotos al servidor.

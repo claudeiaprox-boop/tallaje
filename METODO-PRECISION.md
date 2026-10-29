@@ -70,3 +70,12 @@ Antes de una recomendación automática basada en fotos se deben fijar criterios
 - [GarmentCode: repositorio oficial](https://github.com/maria-korosteleva/GarmentCode). Patrones paramétricos y simulación de prendas, útiles como siguiente fase después de obtener entradas fiables.
 
 Estas fuentes apoyan las decisiones de arquitectura y sus límites. Ninguna certifica el rendimiento de TallaLab ni establece una tabla universal de uniformes escolares.
+
+
+## Detección automática de articulaciones (2.2)
+
+La detección con MediaPipe Pose Lite ahora es automática en cámara frontal y fotografías corporales. El modo IMAGE analiza el cuadro capturado exacto y conserva hasta 33 puntos normalizados en memoria. Solo los puntos con visibilidad suficiente se dibujan; con varias personas no se elige una arbitrariamente. Se pueden revisar los 33 puntos y corregir los apoyos de medida que se proponen. Las correcciones manuales no se sobreescriben al repetir el reconocimiento.
+
+Únicamente se proponen articulaciones de hombros, codo y muñeca de la vista frontal. No se presenta la articulación de cadera como borde de cadera ni la nariz como coronilla; tampoco se inventa cintura, entrepierna o suelo. El análisis del perfil dibuja articulaciones, pero no rellena bordes de confección. La detección automática no cambia los requisitos de cinta/regla, tabla y prueba de la prenda. El número de puntos visibles no representa precisión métrica.
+
+Las inferencias de foto y vídeo tienen cancelación, tiempos límite y liberación de cuadros. No se transmiten fotografías a servicios de inferencia y no hay identificación de personas. El archivo HTML suelto ofrece el recorrido manual y enlaza a la versión HTTPS para cargar los modelos locales. Las pruebas de software y la prueba con una foto de ejemplo verifican ejecución, no exactitud antropométrica escolar.

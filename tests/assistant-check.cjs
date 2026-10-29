@@ -79,6 +79,7 @@ async function fixture(options = {}) {
   page.on('pageerror', error => errors.push(error.message));
   try {
     await page.goto(base, { waitUntil: 'load' });
+    await page.evaluate(() => { document.querySelector('#autoRecognize').checked = false; });
     await page.locator('#steps [data-step="3"]').click();
     await page.locator('#startCamera').click();
     await page.waitForFunction(() => !document.querySelector('#capture').disabled);
