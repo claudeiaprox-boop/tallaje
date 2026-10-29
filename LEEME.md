@@ -1,4 +1,4 @@
-# TallaLab 2.0
+# TallaLab 2.1
 
 Tallaje escolar guiado con cámara, marcado manual, verificación con cinta/regla y comparación con referencias comerciales identificadas. Proyecto Firebase: tallalab-pruebas-20261028.
 
@@ -65,3 +65,12 @@ TallaLab.html contiene interfaz, geometría, tablas, marcado manual e informes. 
 - Las comprobaciones automatizadas de cálculo/interfaz y la cámara simulada verifican funcionamiento; la cámara física y el ajuste de uniformes deben probarse en campo.
 
 Los activos de Google conservan sus avisos. La política de contenido permite recursos propios, workers y compilación WASM; no permite conexiones de la aplicación a dominios externos.
+
+
+## Método actualizado (2.1)
+
+Usa **Tres lecturas** en Verificación: retira y recoloca cinta/regla, revisa mediana y rango. Si las lecturas varían demasiado, repite; si cruzan referencias de talla, prueba las alternativas. Los umbrales del prototipo no prueban exactitud.
+
+Al importar CSV, selecciona medidas corporales o contornos de prenda terminada. Estos últimos requieren la holgura mínima indicada por el proveedor; no uses anchos planos como contornos. El laboratorio de frente/perfil es experimental y nunca decide talla. La asistencia de cámara comprueba postura y estabilidad, sin certificar centímetros.
+
+Consulta [Método y validación pendiente](METODO-PRECISION.md).

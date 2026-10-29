@@ -81,7 +81,25 @@ async function garment(page, value) {
 }
 
 async function fillMeasurements(page, measurements) {
+  if (await page.locator('#measurementMode').inputValue() !== 'single') await page.locator('#measurementMode').selectOption('single');
   for (const [key, value] of Object.entries(measurements)) await page.locator(`#measure-${key}`).fill(String(value));
+}
+
+async function fillRepeats(page, measurements) {
+  if (await page.locator('#measurementMode').inputValue() !== 'repeat') await page.locator('#measurementMode').selectOption('repeat');
+  for (const [key, values] of Object.entries(measurements)) {
+    for (const [index, value] of values.entries()) await page.locator(`#repeat-${key}-${index}`).fill(String(value));
+  }
+}
+
+async function markPhoto(page, marks) {
+  const photo = page.locator('#canvas');
+  const dimensions = await photo.evaluate(element => ({ width: element.width, height: element.height }));
+  for (const [key, x, y] of marks) {
+    await page.locator('#photoPoint').selectOption(key);
+    const box = await photo.boundingBox();
+    await photo.click({ position: { x: x / dimensions.width * box.width, y: y / dimensions.height * box.height } });
+  }
 }
 
 async function ready(page, measurements) {
@@ -126,6 +144,123 @@ async function collectDownload(download) {
 (async () => {
   browser = await chromium.launch({ channel: 'msedge', headless: true, args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'] });
   try {
+    await test('three readings are default, compute median/range and invalidate confirmation on change', () => using({}, async page => {
+      await step(page, 4);
+      assert.equal(await page.locator('#measurementMode').inputValue(), 'repeat');
+      assert.equal(await page.locator('#measure-chest').getAttribute('readonly'), '');
+      await fillRepeats(page, { chest: [69.8, 70, 70.2] });
+      assert.equal(await page.locator('#measure-chest').inputValue(), '70');
+      assert.match(await page.locator('#repeat-status-chest').innerText(), /Mediana: 70 cm/);
+      assert.match(await page.locator('#repeat-status-chest').innerText(), /69[.,]8–70[.,]2 cm/);
+      await page.locator('#confirmed').check();
+      await page.locator('#referenceAccepted').check();
+      await step(page, 5);
+      assert.equal(await page.locator('#recommendation .result-size').innerText(), '12');
+      assert.match(await page.locator('#fitStability').innerText(), /La referencia se mantiene/);
+      await step(page, 4);
+      await page.locator('#repeat-chest-0').fill('69.9');
+      assert.equal(await page.locator('#confirmed').isChecked(), false);
+      await step(page, 5);
+      assert.equal(await page.locator('#recommendation .result-size').innerText(), 'Completa la verificación');
+    }));
+
+    await test('excessive spread blocks size even if the user confirms measurements', () => using({}, async page => {
+      await step(page, 4);
+      await fillRepeats(page, { chest: [68, 68.1, 72] });
+      assert.equal(await page.locator('#measure-chest').inputValue(), '');
+      assert.match(await page.locator('#repeat-status-chest').innerText(), /Repite las tres lecturas/);
+      await page.locator('#confirmed').check();
+      await page.locator('#referenceAccepted').check();
+      await step(page, 5);
+      assert.equal(await page.locator('#recommendation .result-size').innerText(), 'Completa la verificación');
+      assert.match(await page.locator('#reviewWarnings').innerText(), /diferencia entre lecturas supera 1 cm/);
+    }));
+
+    await test('range crossing nominal boundary displays no stable size and reports candidates', () => using({}, async page => {
+      await step(page, 4);
+      await fillRepeats(page, { chest: [67.8, 68, 68.2] });
+      await page.locator('#confirmed').check();
+      await page.locator('#referenceAccepted').check();
+      await step(page, 5);
+      assert.equal(await page.locator('#recommendation .result-size').innerText(), 'Sin talla estable');
+      assert.match(await page.locator('#fitStability').innerText(), /10, 12/);
+      assert.match(await page.locator('#reviewWarnings').innerText(), /rango observado.*cruza referencias/);
+      const pending = page.waitForEvent('download');
+      await page.locator('#downloadReport').click();
+      const report = await collectDownload(await pending);
+      assert.match(report, /Talla de referencia: Sin talla estable/);
+      assert.match(report, /lecturas: 67.8, 68, 68.2/);
+      assert.match(report, /rango observado 67.8 a 68.2/);
+      assert.match(report, /tallas candidatas: 10, 12/);
+      await step(page, 4);
+      await fillMeasurements(page, { chest: 68 });
+      assert.equal(await page.locator('#confirmed').isChecked(), false);
+      assert.match(await page.locator('#measurementFields').innerText(), /Una sola lectura no permite comprobar repetibilidad/);
+      await page.locator('#confirmed').check();
+      await step(page, 5);
+      assert.equal(await page.locator('#recommendation .result-size').innerText(), '10', 'single-reading mode must not reuse previous observed range');
+      assert.match(await page.locator('#reviewWarnings').innerText(), /Una lectura: no se comprobó repetibilidad/);
+      const singlePending = page.waitForEvent('download');
+      await page.locator('#downloadReport').click();
+      const singleReport = await collectDownload(await singlePending);
+      assert.match(singleReport, /Estabilidad de referencia: unchecked/);
+      assert.doesNotMatch(singleReport, /lecturas: 67.8/);
+    }));
+
+    await test('garment CSV requires explicit supplier ease and reports body versus garment dimensions', () => using({}, async page => {
+      await step(page, 4);
+      await fillRepeats(page, { chest: [70, 70, 70] });
+      await page.locator('#step4 details').filter({ hasText: 'Usar la tabla de mi proveedor' }).locator('summary').click();
+      await page.locator('#catalogKind').selectOption('garment');
+      await page.locator('#supplierName').fill('Proveedor · camisa de prueba');
+      await page.locator('#csvInput').setInputFiles({ name: 'prendas.csv', mimeType: 'text/csv', buffer: Buffer.from('talla,pecho,cintura,cadera,pie_cm\n8,72,,,\n10,76,,,\n12,80,,,\n') });
+      await page.waitForFunction(() => document.querySelector('#csvStatus').textContent.includes('Tabla cargada'));
+      assert.equal(await page.locator('#ease-chest').inputValue(), '', 'no invented default ease');
+      assert.match(await page.locator('#catalogTable').textContent(), /Pecho prenda/);
+      await page.locator('#confirmed').check();
+      await page.locator('#referenceAccepted').check();
+      await step(page, 5);
+      assert.equal(await page.locator('#recommendation .result-size').innerText(), 'Completa la verificación');
+      assert.match(await page.locator('#reviewWarnings').innerText(), /Falta la holgura mínima/);
+      await step(page, 4);
+      await page.locator('#ease-chest').fill('6');
+      assert.equal(await page.locator('#referenceAccepted').isChecked(), false, 'changed ease requires accepting supplier data again');
+      await page.locator('#referenceAccepted').check();
+      await step(page, 5);
+      assert.equal(await page.locator('#recommendation .result-size').innerText(), '10');
+      const values = await page.locator('#fitZones tbody tr').first().locator('td').allTextContents();
+      assert.deepEqual(values, ['Contorno de pecho', '70', '76', '6', '6']);
+      assert.match(await page.locator('#fitZones').innerText(), /No se simulan tensión, elasticidad ni caída/);
+    }));
+
+    await test('experimental front/profile ellipse never populates verified body contours', () => using({}, async page => {
+      await garment(page, 'pants');
+      await step(page, 2);
+      await page.locator('#height').fill('160');
+      await step(page, 3);
+      const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="1000"><rect width="600" height="1000" fill="#eef3fa"/><path d="M200 100H400V900H200Z" fill="#6686aa"/></svg>';
+      const file = { name: 'vista.svg', mimeType: 'image/svg+xml', buffer: Buffer.from(svg) };
+      await page.locator('#photoInput').setInputFiles(file);
+      await page.locator('#canvas').waitFor({ state: 'visible' });
+      await markPhoto(page, [['top', 300, 100], ['bottom', 300, 900], ['waistL', 240, 450], ['waistR', 360, 450], ['hipL', 220, 550], ['hipR', 380, 550], ['crotch', 300, 600]]);
+      await page.locator('#viewTabs button').nth(1).click();
+      await page.locator('#photoInput').setInputFiles(file);
+      await page.locator('#canvas').waitFor({ state: 'visible' });
+      await markPhoto(page, [['top', 300, 100], ['bottom', 300, 900], ['waistFront', 250, 450], ['waistBack', 350, 450], ['hipFront', 240, 550], ['hipBack', 360, 550]]);
+      await page.locator('#multiviewPanel summary').click();
+      await page.locator('#multiviewAccepted').check();
+      assert.match(await page.locator('#multiviewResults').innerText(), /Contorno de cintura · elipse ideal/);
+      assert.match(await page.locator('#multiviewResults').innerText(), /Contorno de cadera · elipse ideal/);
+      await step(page, 4);
+      assert.equal(await page.locator('#measure-waist').inputValue(), '');
+      assert.equal(await page.locator('#measure-hip').inputValue(), '');
+      assert.equal(await page.locator('#repeat-waist-0').inputValue(), '');
+      await page.locator('#confirmed').check();
+      await page.locator('#referenceAccepted').check();
+      await step(page, 5);
+      assert.equal(await page.locator('#recommendation .result-size').innerText(), 'Completa la verificación');
+    }));
+
     await test('four garments: choose, prepare, verify and receive nominal reference', () => using({}, async page => {
       const cases = [
         ['shirt', { chest: 68 }, '10'],

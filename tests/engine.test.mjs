@@ -70,6 +70,31 @@ test('side view provides depths with consistent front/back orientation only', ()
   assert.ok(measurePhoto(input).errors.length);
 });
 
+test('chest front/profile geometry yields calibrated dimensions without inventing a circumference', () => {
+  const front = cloneBody();
+  front.points.chestL = { x: 230, y: 350 }; front.points.chestR = { x: 370, y: 350 };
+  const frontal = measurePhoto(front);
+  assert.deepEqual(frontal.errors, []);
+  assert.equal(measured(frontal, 'chestWidth'), 28);
+  const side = { ...body, view: 'side', points: { top: body.points.top, bottom: body.points.bottom, chestFront: { x: 250, y: 350 }, chestBack: { x: 350, y: 350 }, waistFront: { x: 255, y: 450 }, waistBack: { x: 345, y: 450 } } };
+  const lateral = measurePhoto(side);
+  assert.deepEqual(lateral.errors, []);
+  assert.equal(measured(lateral, 'chestDepth'), 20);
+  for (const result of [frontal, lateral]) assert.ok(!result.measures.some(item => ['chest', 'waist', 'hip'].includes(item.id)));
+  side.points.chestFront.y = side.points.chestBack.y = 470;
+  assert.deepEqual(measurePhoto(side).measures, [], 'chest must remain above waist');
+});
+
+test('chest landmarks enforce horizontal order, shoulder level and side orientation', () => {
+  const front = cloneBody();
+  front.points.chestL = { x: 370, y: 350 }; front.points.chestR = { x: 230, y: 350 };
+  assert.deepEqual(measurePhoto(front).measures, []);
+  front.points.chestL = { x: 230, y: 200 }; front.points.chestR = { x: 370, y: 200 };
+  assert.deepEqual(measurePhoto(front).measures, [], 'chest cannot be above shoulders');
+  const side = { ...body, view: 'side', points: { top: body.points.top, bottom: body.points.bottom, chestFront: { x: 350, y: 350 }, chestBack: { x: 250, y: 350 }, waistFront: { x: 255, y: 450 }, waistBack: { x: 345, y: 450 } } };
+  assert.deepEqual(measurePhoto(side).measures, [], 'front/back marking direction must match between chest and waist');
+});
+
 const foot = { kind: 'foot', width: 1000, height: 1000, referenceCm: 10, points: { refA: { x: 100, y: 800 }, refB: { x: 300, y: 800 }, heel: { x: 500, y: 800 }, toe: { x: 500, y: 300 }, footL: { x: 400, y: 500 }, footR: { x: 600, y: 500 } } };
 test('foot reference produces length and width with perspective and allowance warnings', () => {
   const result = measurePhoto(foot);
@@ -141,6 +166,16 @@ test('CSV supports separators, quoted labels, BOM, decimal point, and irrelevant
   assert.equal(parsed.rows[0].foot, undefined);
   const shoes = parseCatalogCsv('talla,pecho,cintura,cadera,pie_cm\n31,,,,20.5\n32,,,,21', { garment: 'shoes' });
   assert.equal(shoes.kind, 'foot'); assert.equal(shoes.rows[0].foot, 20.5);
+});
+
+test('CSV preserves explicit garment versus body semantics and refuses garment tables for shoes', () => {
+  const csv = 'talla,pecho,cintura,cadera,pie_cm\nS,72,64,80,\nM,78,70,86,\n';
+  const garmentTable = parseCatalogCsv(csv, { garment: 'shirt', kind: 'garment' });
+  assert.equal(garmentTable.kind, 'garment');
+  assert.equal(garmentTable.rows[0].chest, 72, 'does not subtract an invented ease');
+  assert.equal(parseCatalogCsv(csv, { garment: 'shirt' }).kind, 'body');
+  for (const kind of ['garment', 'body', 'unknown']) assert.throws(() => parseCatalogCsv('talla,pecho,cintura,cadera,pie_cm\n30,,,,18.5', { garment: 'shoes', kind }), /tipo de tabla/);
+  assert.throws(() => parseCatalogCsv(csv, { garment: 'shirt', kind: 'foot' }), /tipo de tabla/);
 });
 
 test('CSV rejects missing required cells, duplicates, invalid numbers, bad headers and reversed references', () => {

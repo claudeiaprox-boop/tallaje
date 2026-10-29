@@ -1,4 +1,4 @@
-# TallaLab 2.0
+# TallaLab 2.1
 
 Prototipo de tallaje escolar guiado con cámara para **camisa, pantalón, falda y zapatos**. Combina siluetas de encuadre, fotografías, marcado manual con lupa y comparación con tablas de referencia identificadas.
 
@@ -8,18 +8,30 @@ Prototipo de tallaje escolar guiado con cámara para **camisa, pantalón, falda 
 
 1. Elegir una prenda y preparar la estatura real o una referencia física para los pies.
 2. Capturar o cargar fotografías, encuadrar con la silueta y ajustar los puntos. También se puede continuar solo con medidas de cinta.
-3. Introducir medidas verificadas, revisar la tabla elegida o importar la del proveedor.
-4. Consultar una talla orientativa y descargar o imprimir el informe.
+3. Tomar tres lecturas independientes por contorno, revisar la mediana y el rango observado. Si difieren más de 1 cm (0,3 cm en pies), repetir. Hay modo de una lectura con menor evidencia.
+4. Revisar la tabla corporal o importar contornos completos de prenda terminada con la holgura mínima indicada por el proveedor.
+5. Consultar una talla orientativa y descargar o imprimir el informe.
 
 La asistencia opcional de Google MediaPipe orienta la postura mediante articulaciones. La superposición sobre la cámara es una guía visual; **no es un escáner corporal ni una implementación de WebXR**.
 
 ## Precisión y privacidad
 
 - **La precisión no está validada y no hay un margen de error conocido.** Confirmar medidas con cinta o regla y comprobar el ajuste real de la prenda.
-- Las fotografías estiman distancias visibles; sus anchos no se convierten en contornos de pecho, cintura o cadera. Estos contornos deben medirse con cinta.
+- Las fotografías estiman distancias visibles; sus anchos no se convierten en contornos verificados de pecho, cintura o cadera. La comparación elíptica frontal/perfil es experimental y nunca entra en la recomendación. Estos contornos deben medirse con cinta.
 - Para el pie se necesita una referencia física en el mismo plano y cámara perpendicular; confirmar la longitud con regla y probar ambos zapatos.
 - Las tablas de ECI y Clarks corresponden a esas marcas; no son estándares universales ni sustituyen la tabla del proveedor escolar. No se añade holgura automáticamente.
 - Las fotos y medidas permanecen en la memoria del navegador. No hay cuentas, almacenamiento remoto ni analítica; los informes se guardan por acción del usuario.
+
+## Mejoras de método (2.1)
+
+- Tres lecturas, mediana y rango observado. Repetibilidad no equivale a exactitud: los umbrales son operativos, no precisión validada.
+- Sensibilidad a cambios de talla: si los extremos de las lecturas dan referencias distintas, se muestran las candidatas y se pide repetir/probar.
+- Tipo de tabla explícito al importar CSV: cuerpo o prenda terminada. Esta última exige holgura mínima del proveedor por contorno y muestra `prenda − cuerpo`; no simula tejido ni garantiza comodidad.
+- MediaPipe comprueba visibilidad, postura frontal aproximada, encuadre y ocho cuadros estables durante al menos un segundo. Los controles usan puntos sin suavizar; el dibujo tiene filtrado temporal. Las revisiones caducan para evitar usar cuadros antiguos.
+- Frente/perfil permite explorar una sección elíptica ideal, siempre separada de las medidas físicas y del motor de talla.
+- Informes incluyen método, lecturas, rango, tipo de tabla, holguras y origen del control de encuadre, sin fotografías.
+
+[Análisis del documento y protocolo pendiente de validación escolar](METODO-PRECISION.md).
 
 ## Inicio rápido
 
@@ -47,6 +59,7 @@ npm run vision:verify
 ```sh
 npm install --no-save --package-lock=false playwright
 npm run test:ui
+npm run test:assistant
 ```
 
 Las pruebas de interfaz utilizan cámara simulada. El funcionamiento con cámara física y la precisión del tallaje requieren pruebas de campo.

@@ -97,15 +97,21 @@ export function measurePhoto({ kind = 'body', view = 'front', points = {}, width
     return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, direction: Math.sign(b.x - a.x) };
   }
   if (view === 'side') {
+    const chest = pair('chestFront', 'chestBack', 'chestDepth', 'Profundidad lateral de pecho', false);
     const waist = pair('waistFront', 'waistBack', 'waistDepth', 'Profundidad lateral de cintura', false);
     const hip = pair('hipFront', 'hipBack', 'hipDepth', 'Profundidad lateral de cadera', false);
+    if (chest && waist && chest.y >= waist.y) error('El pecho debe quedar por encima de la cintura.');
+    if (chest && waist && chest.direction !== waist.direction) error('Marca frente y espalda de forma consistente en la vista lateral.');
     if (waist && hip && waist.y >= hip.y) error('La cintura debe quedar por encima de la cadera.');
     if (waist && hip && waist.direction !== hip.direction) error('Marca frente y espalda de forma consistente en la vista lateral.');
     return finish();
   }
   const shoulder = pair('shoulderL', 'shoulderR', 'shoulderWidth', 'Ancho entre hombros');
+  const chest = pair('chestL', 'chestR', 'chestWidth', 'Ancho frontal de pecho');
   const waist = pair('waistL', 'waistR', 'waistWidth', 'Ancho frontal de cintura');
   const hip = pair('hipL', 'hipR', 'hipWidth', 'Ancho frontal de cadera');
+  if (chest && waist && chest.y >= waist.y) error('El pecho debe quedar por encima de la cintura.');
+  if (shoulder && chest && shoulder.y >= chest.y) error('Los hombros deben quedar por encima del pecho.');
   if (shoulder && waist) {
     if (shoulder.y >= waist.y) error('Los hombros deben quedar por encima de la cintura.');
     else add('torsoLength', 'Largo visual del torso', (waist.y - shoulder.y) * scale);
@@ -221,8 +227,9 @@ function splitCsv(text, delimiter) {
   return rows;
 }
 
-export function parseCatalogCsv(text, { name = 'Tabla importada', garment } = {}) {
+export function parseCatalogCsv(text, { name = 'Tabla importada', garment, kind = garment === 'shoes' ? 'foot' : 'body' } = {}) {
   if (!GARMENTS.has(garment)) throw new Error('Selecciona una prenda válida antes de importar la tabla.');
+  if (!(garment === 'shoes' ? kind === 'foot' : ['body', 'garment'].includes(kind))) throw new Error('El tipo de tabla no corresponde a esta prenda.');
   if (typeof text !== 'string' || !text.trim()) throw new Error('El archivo CSV está vacío.');
   if (text.length > 250000) throw new Error('La tabla CSV es demasiado grande.');
   const clean = text.replace(/^\uFEFF/, '');
@@ -259,5 +266,5 @@ export function parseCatalogCsv(text, { name = 'Tabla importada', garment } = {}
   for (let i = 1; i < parsed.length; i++) {
     if (required.some(field => parsed[i][field] < parsed[i - 1][field])) throw new Error('Ordena las tallas de menor a mayor en todas las medidas requeridas.');
   }
-  return { name: String(name || 'Tabla importada'), garment, kind: garment === 'shoes' ? 'foot' : 'body', rows: parsed };
+  return { name: String(name || 'Tabla importada'), garment, kind, rows: parsed };
 }

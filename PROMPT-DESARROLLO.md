@@ -52,3 +52,8 @@ Un recorrido de cinco pasos: elegir prenda, preparar/calibrar, capturar, verific
 ## Alcance de esta versión
 
 La superposición sobre cámara y el asistente de postura son una guía visual interactiva. No constituyen un escáner volumétrico, una reconstrucción corporal en profundidad ni una implementación universal de WebXR. Cualquier ampliación a profundidad o reconstrucción 3D deberá comprobar hardware, calibración, privacidad y precisión de manera independiente.
+
+
+## Método 2.1: criterios obligatorios
+
+Mantener separados el seguimiento AR, las estimaciones fotográficas, las medidas físicas y las dimensiones de prenda. El modo recomendado pide tres lecturas independientes y usa mediana/rango; solicita repetir si la dispersión supera el umbral operativo (1 cm corporal; 0,3 cm pie), sin llamarlo precisión o intervalo de confianza. Los extremos observados deben probarse contra el motor para exponer cambios de talla. Diferenciar tipo corporal/contorno prenda al importar; prenda necesita holgura mínima explícita del proveedor. No inferir comodidad, caída o elasticidad. La elipse de dos vistas es solo laboratorio sin conexión automática a medidas verificadas. El control de captura exige 8 cuadros estables y 1 segundo, usa puntos originales, y caduca con fotogramas antiguos; el suavizado es solo visual. Validar en escolares según METODO-PRECISION.md antes de prometer exactitud.
