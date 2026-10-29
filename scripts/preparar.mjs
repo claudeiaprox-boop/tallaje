@@ -2,10 +2,10 @@ import { mkdir, readFile, writeFile, copyFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
 const root = new URL('../', import.meta.url);
-const [template, styles, engine, fit, landmarks, catalogs, app] = await Promise.all(
-  ['src/index.html', 'src/style.css', 'src/engine.mjs', 'src/fit.mjs', 'src/landmarks.mjs', 'src/catalogs.mjs', 'src/app.mjs'].map(path => readFile(new URL(path, root), 'utf8'))
+const [template, styles, engine, fit, landmarks, inventory, catalogs, app] = await Promise.all(
+  ['src/index.html', 'src/style.css', 'src/engine.mjs', 'src/fit.mjs', 'src/landmarks.mjs', 'src/inventory.mjs', 'src/catalogs.mjs', 'src/app.mjs'].map(path => readFile(new URL(path, root), 'utf8'))
 );
-const bundle = [engine, fit, landmarks, catalogs, app].map(code => code.replace(/^import .+;\r?\n/gm, '')).join('\n').replace(/^export /gm, '');
+const bundle = [engine, fit, landmarks, inventory, catalogs, app].map(code => code.replace(/^import .+;\r?\n/gm, '')).join('\n').replace(/^export /gm, '');
 const html = template.replace('<!--STYLES-->', () => `<style>\n${styles}\n</style>`).replace('<!--APP-->', () => `<script type="module">\n${bundle}\n</script>`);
 if (!html.includes('getUserMedia') || html.includes('<!--APP-->')) throw new Error('La preparación de TallaLab no se completó.');
 const output = new URL('public/', root);
@@ -14,7 +14,7 @@ await writeFile(new URL('index.html', output), html, 'utf8');
 await writeFile(new URL('TallaLab.html', output), html, 'utf8');
 await writeFile(new URL('TallaLab.html', root), html, 'utf8');
 for (const name of ['vision.mjs', 'pose-worker.mjs', 'pose-quality.mjs', 'photo-vision.mjs']) await copyFile(new URL(`src/${name}`, root), new URL(name, output));
-for (const name of ['INVESTIGACION.md', 'PROMPT-DESARROLLO.md', 'METODO-PRECISION.md']) await copyFile(new URL(name, root), new URL(name, output));
+for (const name of ['INVESTIGACION.md', 'PROMPT-DESARROLLO.md', 'METODO-PRECISION.md', 'REFERENCIAS-ACTA.md']) await copyFile(new URL(name, root), new URL(name, output));
 await writeFile(new URL('404.html', output), `<!doctype html>
 <html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Página no encontrada · TallaLab</title>

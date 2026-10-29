@@ -1,6 +1,6 @@
 {
   "name": "tallalab",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "private": true,
   "type": "module",
   "description": "Tallaje escolar guiado con cámara y referencias verificables",
@@ -8,11 +8,12 @@
     "build": "node scripts/preparar.mjs",
     "vision:setup": "node scripts/instalar-vision.mjs",
     "vision:verify": "node scripts/instalar-vision.mjs --verify-only",
-    "test": "node --test tests/engine.test.mjs tests/fit.test.mjs tests/pose-quality.test.mjs tests/landmarks.test.mjs tests/vision-cancel.test.mjs",
+    "test": "node --test tests/engine.test.mjs tests/fit.test.mjs tests/pose-quality.test.mjs tests/landmarks.test.mjs tests/vision-cancel.test.mjs tests/inventory.test.mjs",
     "test:ui": "node tests/ui-check.cjs",
     "dev": "node scripts/servidor-pruebas.mjs",
     "deploy": "firebase deploy --only hosting",
     "test:assistant": "node tests/assistant-check.cjs",
-    "test:recognition": "node tests/recognition-check.cjs"
+    "test:recognition": "node tests/recognition-check.cjs",
+    "test:inventory": "node tests/inventory-ui.cjs"
   }
 }

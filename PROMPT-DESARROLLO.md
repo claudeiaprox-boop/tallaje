@@ -62,3 +62,8 @@ Mantener separados el seguimiento AR, las estimaciones fotográficas, las medida
 ## Reconocimiento IA 2.2
 
 Arrancar MediaPipe Pose automáticamente en cámara frontal y fotos corporales. Conservar hasta 33 articulaciones con visibilidad suficiente, mostrar esqueleto y permitir inspección. Inferir sobre la foto capturada exacta (IMAGE), nunca proyectar un resultado anterior del vídeo sobre otra imagen. Autocompletar solo apoyos articulares compatibles (hombros/codo/muñeca), conservar correcciones manuales al reanalizar y mantener el marcado de coronilla/suelo/bordes y los contornos físicos separados. Con cero o varias personas, no producir propuestas arbitrarias. Cancelar carga/inferencia al cambiar sesión/vista y liberar recursos inmediatamente, incluidos bitmaps que llegan tarde. No identificar personas ni enviar fotos al servidor.
+
+
+## Etiquetas del acta (2.3)
+
+Las etiquetas y los modelos se extraen del acta, sin incorporar cantidades en blanco ni inventar centímetros. La guía orientativa de otra marca se activa por acción explícita y mantiene provisional:true en UI/informe. La coincidencia numérica Tn/ECIn o EU es una hipótesis visible, no equivalencia validada. No extrapolar tallas sin referencia ni convertir #16 de otra línea en T16. Las tablas reales se vinculan a un solo artículo e indican cuerpo/prenda/pie, origen y confirmación. Conservar etiquetas exactas, restricciones de rango, variación entre lecturas y holguras. Preservar perfiles por artículo en memoria entre alumnos sin conservar sus fotos/medidas/confirmaciones.

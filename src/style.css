@@ -3,3 +3,7 @@
 /* Repeated physical measurements and explicit fit evidence. */
 .measurement-field{min-width:0}.measurement-fields{grid-template-columns:1fr}.repeat-inputs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.repeat-inputs label{font-size:11px;color:var(--muted)}.repeat-inputs input{padding:10px 8px;min-width:0}.repeat-summary{font-size:12px;padding:10px;border-radius:10px;background:var(--pale)}.repeat-summary.problem{background:var(--amber);color:#685623}input[readonly]{background:#eef3f9;color:#475e78}.stability-panel{background:var(--pale);padding:16px;border-radius:14px;margin:16px 0;font-size:13px}.stability-panel.boundary{background:var(--amber);border:1px solid #dfc57d}.stability-panel h3{margin-bottom:5px}#multiviewPanel{margin-top:20px}#easeFields{margin:10px 0}.quality-label{font-size:12px;font-weight:650;color:var(--green)}
 .two-columns>*,.result-layout>*,.capture-layout>*{min-width:0}.table-scroll{max-width:100%}#fitStability,#multiviewResults{overflow-wrap:anywhere}
+
+.inventory-selection{margin-bottom:24px}#useProvisionalGuide{margin-top:12px}#inventoryMeasurements input{min-width:86px;width:100px;padding:9px;font-size:14px}#inventoryMeasurements th{white-space:normal}#inventoryNotice,#inventoryResult,#catalogNote{overflow-wrap:anywhere}#inventoryResult.provisional{background:var(--amber);border:1px solid #dfc57d}#inventoryEditorSource{min-width:0}
+
+.recommendation.provisional{background:var(--amber);border-color:#dfc57d}.recommendation.provisional .result-kicker,.recommendation.provisional .result-size{color:#725b22}

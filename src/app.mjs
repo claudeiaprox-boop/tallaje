@@ -1,11 +1,12 @@
 import { measurePhoto, recommendSize, parseCatalogCsv, requiredFieldsFor } from './engine.mjs';
 import { summarizeRepeated, evaluateFit, ellipseCircumference } from './fit.mjs';
 import { BODY_LANDMARKS, POSE_CONNECTIONS, mapPoseToPhoto } from './landmarks.mjs';
+import { INVENTORY_ITEMS, parseInventoryCatalogCsv, createInventoryTemplate, createProvisionalInventoryCatalog, evaluateInventoryMatch } from './inventory.mjs';
 import { CATALOGS, SOURCES } from './catalogs.mjs';
 
 const $ = id => document.getElementById(id);
 const canvas = $('canvas'), ctx = canvas.getContext('2d'), video = $('video'), overlay = $('liveOverlay'), overlayCtx = overlay.getContext('2d');
-const state = { garment: 'shirt', step: 1, view: 'front', photos: {}, measurements: {}, catalogId: 'eci-nino', customCatalogs: [], demo: false, repeats: {}, ease: {} };
+const state = { garment: 'shirt', step: 1, view: 'front', photos: {}, measurements: {}, catalogContext: 'inventory', inventoryItemId: 'camisa-blanca', catalogId: null, customCatalogs: [], demo: false, repeats: {}, ease: {} };
 let stream = null, cameraToken = 0, imageToken = 0, assistant = null, assistToken = 0, pose = null, poseAt = 0, poseExpiry = null, assistLoading = false, dragging = false, pointerMoved = false, activePoint = 'top', dragKey = null, activeAiPoint = 11, recognitionController = null, recognitionRun = 0, assistantController = null;
 const GARMENT_DATA = {
  shirt: { name: 'Camisa', description: 'Pecho, hombros y manga', needed: 'Contorno de pecho. Revisa además cuello, manga y largo según el modelo.', icon: '<path d="m22 13-13 8 9 15 8-5v31h30V31l8 5 9-15-13-8-11-3-7 9-7-9-13 3Z"/><path d="m35 10 7 9-8 7-8-13m23-3-7 9 8 7 8-13M42 24v38"/>' },
@@ -79,11 +80,11 @@ function setGarment(garment) {
  $('confirmed').checked=false; $('referenceAccepted').checked=false;
  state.catalogId=isFoot()?'clarks-kids':garment==='skirt'?'eci-nina':'eci-nino';
  for (const button of $('garments').children) button.setAttribute('aria-pressed', String(button.dataset.garment===garment));
- renderPreparation(); renderMeasureFields(); renderCatalogs(); renderCapture();
+ renderInventorySelection();renderPreparation(); renderMeasureFields(); renderCatalogs(); renderCapture();
  announce(`${GARMENT_DATA[garment].name} seleccionada.`);
 }
 function renderPreparation() {
- $('selectedGarment').textContent=GARMENT_DATA[state.garment].name; $('neededMeasures').textContent=GARMENT_DATA[state.garment].needed;
+ $('selectedGarment').textContent=state.catalogContext==='inventory'?selectedInventoryItem().name:GARMENT_DATA[state.garment].name; $('neededMeasures').textContent=GARMENT_DATA[state.garment].needed;
  $('bodyCalibration').hidden=isFoot();$('footCalibration').hidden=!isFoot();
  $('prepSubtitle').textContent=isFoot()?'Una captura independiente para cada pie, con referencia física comprobada.':'La estatura sirve de escala; una persona adulta puede ayudarte a encuadrar.';
  const instructions=isFoot()?['Mide ambos pies descalzos y con el peso repartido. Utiliza el pie de mayor longitud.','Apoya el pie sobre un suelo plano, junto a una referencia medida con regla; evita que el pie la tape.','Fotografía desde arriba y perpendicular al suelo. La inclinación de la cámara introduce errores.','Comprueba la longitud con regla y el ancho al probar ambos zapatos.']:['Usa ropa ajustada, sin zapatos. No es necesario mostrar detalles del rostro.','Coloca la cámara recta a media altura del cuerpo y evita el gran angular. Usa ayuda de otra persona.','Incluye cabeza y plantas de los pies; separa ligeramente los brazos.','Para menores, cuenta con la autorización de su responsable. Repite si hay movimiento o mala luz.'];
@@ -302,17 +303,58 @@ function renderMeasureFields(){
  if(repeated)for(const key of required)syncRepeated(key);
  const note=node('p',repeated?`Repite si la diferencia supera ${isFoot()?'0,3':'1'} cm. Es un umbral operativo del prototipo, no una garantía de precisión.`:'Una sola lectura no permite comprobar repetibilidad. Usa tres lecturas para detectar variaciones.','hint');$('measurementFields').append(note);
 }
-function availableCatalogs(){return [...CATALOGS,...state.customCatalogs].filter(c=>(isFoot()?c.kind==='foot':['body','garment'].includes(c.kind))&&(!c.garment||c.garment===state.garment));}
+function selectedInventoryItem(){return INVENTORY_ITEMS.find(item=>item.id===state.inventoryItemId&&item.garment===state.garment)||INVENTORY_ITEMS.find(item=>item.garment===state.garment);}
+function renderInventorySetup(catalog){
+ const active=state.catalogContext==='inventory';$('inventorySetup').hidden=!active;if(!active)return;
+ const item=selectedInventoryItem(),fields=isFoot()?['foot']:requiredFieldsFor(state.garment),labels={foot:'Largo del pie (cm)',chest:'Pecho (cm)',waist:'Cintura (cm)',hip:'Cadera (cm)'};
+ const missing=item.sizes.filter(size=>!catalog?.rows.some(row=>row.size===size));
+ $('inventoryNotice').textContent=catalog?`${item.name}: ${catalog.rows.length} tallas con referencia. ${catalog.provisional?'GUÍA PROVISIONAL: correspondencia sin validar con este uniforme.':'Medidas declaradas por el usuario para este artículo.'}${missing.length?' Sin referencia en cm: '+missing.join(', ')+'.':''}`:`${item.name}: faltan las equivalencias en centímetros. Puedes cargar una guía orientativa o introducir medidas reales por talla.`;
+ $('inventoryEditorKind').disabled=isFoot();$('inventoryEditorKind').value=catalog&&!catalog.provisional&&catalog.kind==='garment'?'garment':'body';
+ $('inventoryEditorSource').value=catalog&&!catalog.provisional?catalog.originText||'':'';$('inventoryEditorConfirmed').checked=false;$('inventoryEditorStatus').textContent='';
+ const table=node('table'),head=node('thead'),heading=node('tr');heading.append(node('th','Talla del acta'));for(const key of fields)heading.append(node('th',labels[key]));head.append(heading);table.append(head);
+ const body=node('tbody');for(const size of item.sizes){const row=node('tr');row.append(node('th',size));for(const key of fields){const cell=node('td'),input=document.createElement('input');input.type='number';input.inputMode='decimal';input.step='.1';input.min='0.1';input.max=isFoot()?'40':'300';input.dataset.size=size;input.dataset.measure=key;input.setAttribute('aria-label',`${size} · ${labels[key]}`);input.placeholder='Pendiente';input.value=!catalog?.provisional?catalog?.rows.find(row=>row.size===size)?.[key]??'':'';input.addEventListener('input',()=>{$('inventoryEditorConfirmed').checked=false;});cell.append(input);row.append(cell);}body.append(row);}table.append(body);$('inventoryMeasurements').replaceChildren(table);
+}
+function saveInventoryMeasures(){
+ try{
+  const item=selectedInventoryItem(),source=$('inventoryEditorSource').value.trim();
+  if(!$('inventoryEditorConfirmed').checked)throw new Error('Confirma que las medidas proceden del proveedor o de uniformes reales.');
+  if(!source)throw new Error('Indica el origen de estas medidas antes de guardar.');
+  const mapping={chest:'pecho',waist:'cintura',hip:'cadera',foot:'pie_cm'},rows=[];
+  for(const size of item.sizes){const values={};for(const input of $('inventoryMeasurements').querySelectorAll('input'))if(input.dataset.size===size)values[mapping[input.dataset.measure]]=input.value;
+   if(!Object.values(values).some(value=>value!==''))continue;
+   rows.push([size,values.pecho||'',values.cintura||'',values.cadera||'',values.pie_cm||''].join(','));
+  }
+  if(!rows.length)throw new Error('Introduce los centímetros de al menos una talla.');
+  const catalog=parseInventoryCatalogCsv(['talla,pecho,cintura,cadera,pie_cm',...rows].join('\n'),{itemId:item.id,kind:isFoot()?'foot':$('inventoryEditorKind').value,name:`${item.name} · ${source}`});
+  catalog.id='custom-'+crypto.randomUUID();catalog.originText=source;catalog.date=new Date().toLocaleDateString('sv-SE');state.customCatalogs.push(catalog);state.catalogId=catalog.id;$('referenceAccepted').checked=false;renderCatalogs();$('inventoryEditorStatus').textContent=`Tabla guardada para ${item.name}: ${catalog.rows.length} tallas. Confirma la referencia antes de sugerir.`;
+ }catch(error){$('inventoryEditorStatus').textContent=error.message;}
+}
+function renderInventoryResult(output){
+ const target=$('inventoryResult');target.hidden=state.catalogContext!=='inventory';target.replaceChildren();if(target.hidden)return;
+ const match=output.inventory,catalog=getCatalog(),item=selectedInventoryItem();target.classList.toggle('provisional',!!catalog?.provisional);
+ target.append(node('h3',`${item.name} · ${match?.size||'sin talla única del acta'}`));
+ target.append(node('p',catalog?.provisional?'Sugerencia provisional con una guía de otra marca. La igualdad numérica de etiquetas no acredita equivalencia. Comprueba el uniforme antes de decidir.':catalog?'La sugerencia usa centímetros declarados para este artículo y conserva su etiqueta exacta del acta. Confirma el ajuste real.':'Falta una tabla en centímetros. El acta solo enumera tallas; no permite deducir sus medidas.'));
+ if(match?.candidates.length)target.append(node('p',`Tallas del acta para revisar: ${match.candidates.join(', ')}.`));
+ target.append(node('p','El documento no contiene cantidades completadas: consulta las existencias por separado.','hint'));
+}
+function renderInventorySelection(){
+ const items=INVENTORY_ITEMS.filter(item=>item.garment===state.garment);state.inventoryItemId=selectedInventoryItem().id;
+ $('catalogContext').value=state.catalogContext;$('inventorySelection').hidden=state.catalogContext!=='inventory';$('inventorySetup').hidden=state.catalogContext!=='inventory';
+ $('inventoryItem').replaceChildren(...items.map(item=>{const option=node('option',item.name);option.value=item.id;return option;}));$('inventoryItem').value=state.inventoryItemId;
+ $('actaSizes').textContent=`Tallas que figuran para ${selectedInventoryItem().name}: ${selectedInventoryItem().sizes.join(', ')}. No confirma existencias.`;
+}
+function availableCatalogs(){return state.catalogContext==='inventory'?state.customCatalogs.filter(c=>c.inventoryItemId===selectedInventoryItem().id):[...CATALOGS,...state.customCatalogs.filter(c=>!c.inventoryItemId)].filter(c=>(isFoot()?c.kind==='foot':['body','garment'].includes(c.kind))&&(!c.garment||c.garment===state.garment));}
 function getCatalog(){const available=availableCatalogs();return available.find(c=>c.id===state.catalogId)||available[0];}
 function renderCatalogs(){
- const catalogs=availableCatalogs();if(!catalogs.some(c=>c.id===state.catalogId))state.catalogId=catalogs[0]?.id;
- $('catalog').replaceChildren(...catalogs.map(c=>{const option=node('option',c.name);option.value=c.id;return option;}));$('catalog').value=state.catalogId;renderCatalogDetails();
+ const catalogs=availableCatalogs();if(!catalogs.some(c=>c.id===state.catalogId))state.catalogId=(state.catalogContext==='inventory'?(catalogs.filter(c=>!c.provisional).at(-1)||catalogs.at(-1)):catalogs[0])?.id;
+ $('catalog').disabled=!catalogs.length;
+ $('catalog').replaceChildren(...catalogs.map(c=>{const option=node('option',c.name);option.value=c.id;return option;}));if(!catalogs.length){const option=node('option','Sin tabla en cm: completa medidas o carga una guía');option.value='';$('catalog').append(option);}else $('catalog').value=state.catalogId;renderCatalogDetails();
 }
 function renderCatalogDetails(){
- const c=getCatalog();renderEaseFields(c);$('catalogKind').disabled=isFoot();if(isFoot())$('catalogKind').value='body';$('catalogNote').textContent=c?`${c.note||'Tabla corporal importada para esta prenda.'} ${c.date?'Consultada: '+c.date+'.':''}`:'Selecciona una tabla.';
+ const c=getCatalog();renderInventorySetup(c);renderEaseFields(c);$('catalogKind').disabled=isFoot();if(isFoot())$('catalogKind').value='body';$('catalogNote').textContent=c?`${c.note||'Tabla corporal importada para esta prenda.'} ${c.date?'Consultada: '+c.date+'.':''}`:'Selecciona una tabla.';
  $('catalogSource').hidden=!c?.source;if(c?.source)$('catalogSource').href=c.source;
- $('referenceAcceptanceLabel').textContent=c?.id?.startsWith('custom-')?'Confirmo que la tabla, su tipo de medida y las holguras indicadas corresponden a este proveedor y modelo.':'Entiendo que es una referencia de esta marca para pruebas y puede diferir de la del proveedor del colegio.';
- const columns=isFoot()?[['size','Talla Clarks EU / proveedor'],['foot','Pie (cm)']]:[['size','Talla'],['chest',c?.kind==='garment'?'Pecho prenda (cm)':'Pecho cuerpo (cm)'],['waist',c?.kind==='garment'?'Cintura prenda (cm)':'Cintura cuerpo (cm)'],['hip',c?.kind==='garment'?'Cadera prenda (cm)':'Cadera cuerpo (cm)']];
+ $('referenceAcceptanceLabel').textContent=c?.provisional?'Acepto usar una guía provisional de otra marca. La equivalencia con este uniforme no está validada; comprobaré el ajuste.':state.catalogContext==='inventory'?'Confirmo que esta tabla corresponde al artículo del acta y al tipo de medidas seleccionado.':c?.id?.startsWith('custom-')?'Confirmo que la tabla, su tipo de medida y las holguras indicadas corresponden a este proveedor y modelo.':'Entiendo que es una referencia de esta marca para pruebas y puede diferir de la del proveedor del colegio.';
+ const columns=isFoot()?[['size',state.catalogContext==='inventory'?'Talla del acta':'Talla Clarks EU / proveedor'],['foot','Pie (cm)']]:[['size','Talla'],['chest',c?.kind==='garment'?'Pecho prenda (cm)':'Pecho cuerpo (cm)'],['waist',c?.kind==='garment'?'Cintura prenda (cm)':'Cintura cuerpo (cm)'],['hip',c?.kind==='garment'?'Cadera prenda (cm)':'Cadera cuerpo (cm)']];
  const table=document.createElement('table'),head=document.createElement('thead'),tr=document.createElement('tr');for(const [,label]of columns)tr.append(node('th',label));head.append(tr);table.append(head);const body=document.createElement('tbody');for(const row of c?.rows||[]){const line=document.createElement('tr');for(const [key]of columns)line.append(node('td',row[key]===undefined?'—':String(row[key])));body.append(line);}table.append(body);$('catalogTable').replaceChildren(table);
 }
 function renderEaseFields(catalog) {
@@ -327,6 +369,7 @@ function recommendation(){
  const output=evaluateFit({garment:state.garment,measurements:state.measurements,ranges,catalog:getCatalog(),ease:state.ease[getCatalog()?.id]||{},confirmed:$('confirmed').checked,referenceAccepted:$('referenceAccepted').checked});
  if(problems.length){output.status='missing';output.size=null;output.zones=[];output.warnings.unshift(...problems);}
  if(!repeated)output.warnings.push('Una lectura: no se comprobó repetibilidad ni sensibilidad de talla entre lecturas.');
+ if(state.catalogContext==='inventory'){const match=evaluateInventoryMatch({itemId:selectedInventoryItem().id,recommendation:output,catalog:getCatalog()});output.inventory=match;output.warnings.unshift(...match.warnings);if(!['ready','boundary'].includes(match.status)){output.status=match.status;output.size=null;output.zones=[];}}
  return output;
 }
 function renderFitEvidence(output){
@@ -338,12 +381,12 @@ function renderFitEvidence(output){
  const body=node('tbody');for(const z of output.zones){const r=node('tr');for(const value of [FIELDS[z.key][0],format(z.body),format(z.garment),format(z.ease),format(z.minEase)])r.append(node('td',value));body.append(r);}table.append(body);zones.append(table,node('p','Se comprueba la holgura mínima introducida. No se simulan tensión, elasticidad ni caída del tejido.','hint'));
 }
 function renderRecommendation(){
- const output=recommendation(),catalog=getCatalog(),target=$('recommendation');const boundary=output.stability.status==='boundary';target.classList.toggle('ready',output.status==='ready'&&!boundary);target.replaceChildren();
- target.append(node('div',state.demo?'EJEMPLO FICTICIO':boundary?'REPETIR Y PROBAR ALTERNATIVAS':output.status==='ready'?'TALLA DE REFERENCIA PARA PROBAR':'FALTA REVISIÓN','result-kicker'));
- target.append(node('div',boundary?'Sin talla estable':output.status==='ready'?output.size:output.status==='outside'?'Fuera de esta tabla':output.status==='missing'?'Completa la verificación':'Revisa la tabla',`result-size${output.status==='ready'&&!boundary?'':' waiting'}`));
- target.append(node('p',`${GARMENT_DATA[state.garment].name} · ${catalog?.name||'Sin tabla'}`,'result-subtitle'));
+ const output=recommendation(),catalog=getCatalog(),target=$('recommendation');const boundary=output.stability.status==='boundary';target.classList.toggle('ready',output.status==='ready'&&!boundary&&!catalog?.provisional);target.classList.toggle('provisional',!!catalog?.provisional);target.replaceChildren();
+ target.append(node('div',state.demo?'EJEMPLO FICTICIO':boundary?'REPETIR Y PROBAR ALTERNATIVAS':output.status==='ready'?(catalog?.provisional?'TALLA ORIENTATIVA DEL ACTA':state.catalogContext==='inventory'?'TALLA DEL ACTA PARA PROBAR':'TALLA DE REFERENCIA PARA PROBAR'):'FALTA REVISIÓN','result-kicker'));
+ target.append(node('div',boundary?'Sin talla estable':output.status==='ready'?output.size:output.status==='unconfigured'?'Sin equivalencia en cm':output.status==='outside'?'Fuera de esta tabla':output.status==='missing'?'Completa la verificación':'Revisa la tabla',`result-size${output.status==='ready'&&!boundary?'':' waiting'}`));
+ target.append(node('p',`${state.catalogContext==='inventory'?selectedInventoryItem().name:GARMENT_DATA[state.garment].name} · ${catalog?.name||'Sin tabla en cm'}`,'result-subtitle'));
  target.append(node('p',boundary?'Repite la medición y prueba las tallas candidatas antes de elegir.':output.status==='ready'?'La sugerencia es orientativa. Confirma corte, largos y ajuste con el proveedor.':'No se extrapola ni se inventa una talla cuando faltan datos o la tabla no cubre las medidas.','result-note'));
- renderFitEvidence(output);
+ renderInventoryResult(output);renderFitEvidence(output);
  const evidence=$('resultEvidence');evidence.replaceChildren();for(const key of requiredFieldsFor(state.garment)){const value=state.measurements[key];evidence.append(node('span',`${FIELDS[key][0]}: ${value?format(value)+' cm':'pendiente'}`,'evidence-chip'));}
  const list=node('ul',undefined,'evidence-list');for(const text of output.details)list.append(node('li',text));if(!output.details.length)list.append(node('li','La talla necesita medidas comprobadas y una tabla aceptada.'));evidence.append(list);
  evidence.append(node('p',Object.keys(state.photos).length?`Capturas de apoyo: ${Object.keys(state.photos).map(v=>({front:'frontal',side:'lateral',leftFoot:'pie izquierdo',rightFoot:'pie derecho'})[v]).join(', ')}. No se usan anchos de foto como contornos.`:'Recorrido con cinta o regla; sin fotografía.','hint'));
@@ -351,16 +394,17 @@ function renderRecommendation(){
  $('reviewWarnings').replaceChildren(...warnings.map(text=>node('p',text)));
 }
 function reportText(){
- const output=recommendation(),catalog=getCatalog(),lines=['TALLALAB 2.2 — INFORME ORIENTATIVO',state.demo?'EJEMPLO FICTICIO. NO CORRESPONDE A UNA PERSONA.':'Sesión de prueba; datos introducidos por el usuario.',`Fecha: ${new Date().toLocaleString('es-GT')}`,`Prenda: ${GARMENT_DATA[state.garment].name}`,`Referencia: ${catalog?.name||'Sin tabla'}`,`Fuente: ${catalog?.source||'Tabla importada por el usuario'}`,`Estado: ${output.stability.status==='boundary'?'boundary':output.status}`,`Talla de referencia: ${output.stability.status==='boundary'?'Sin talla estable; referencia central '+(output.size||'fuera de tabla'):output.size||'No se asigna'}`,`Tipo de tabla: ${catalog?.kind||'sin tabla'}`,`Método: ${$('measurementMode').value==='repeat'?'Tres lecturas independientes':'Una lectura'}`,'','MEDIDAS INTRODUCIDAS (cm)'];
+ const output=recommendation(),catalog=getCatalog(),lines=['TALLALAB 2.3 — INFORME ORIENTATIVO',state.demo?'EJEMPLO FICTICIO. NO CORRESPONDE A UNA PERSONA.':'Sesión de prueba; datos introducidos por el usuario.',`Fecha: ${new Date().toLocaleString('es-GT')}`,`Prenda: ${GARMENT_DATA[state.garment].name}`,`Artículo del acta: ${state.catalogContext==='inventory'?selectedInventoryItem().name:'No seleccionado'}`,`Naturaleza de la tabla: ${!catalog?'Sin tabla en centímetros':catalog.provisional?'PROVISIONAL · equivalencia con el uniforme no validada':state.catalogContext==='inventory'?'Medidas declaradas del artículo / proveedor':'Referencia externa'}`,`Referencia: ${catalog?.name||'Sin tabla'}`,`Fuente: ${catalog?.sourceLabel||catalog?.source||'Tabla importada por el usuario'}`,`Estado: ${output.stability.status==='boundary'?'boundary':output.status}`,`Talla de referencia: ${output.stability.status==='boundary'?'Sin talla estable; referencia central '+(output.size||'fuera de tabla'):output.size||'No se asigna'}`,`Tipo de tabla: ${catalog?.kind||'sin tabla'}`,`Método: ${$('measurementMode').value==='repeat'?'Tres lecturas independientes':'Una lectura'}`,'','MEDIDAS INTRODUCIDAS (cm)'];
  for(const [key,value]of Object.entries(state.measurements))if(value&&FIELDS[key])lines.push(`${FIELDS[key][0]}: ${value}`);
  for(const key of requiredFieldsFor(state.garment)){if($('measurementMode').value==='repeat'){const r=repeatSummary(key);lines.push(`${FIELDS[key][0]} · lecturas: ${(state.repeats[key]||[]).join(', ')}; estado ${r.status}; rango observado ${r.range?.join(' a ')||'pendiente'} cm.`);}}
+ if(state.catalogContext==='inventory')lines.push(`Tallas enumeradas para este artículo: ${selectedInventoryItem().sizes.join(', ')}`,`Talla del acta sugerida: ${output.inventory?.size||'Sin talla única'}`,`Candidatas del acta: ${output.inventory?.candidates.join(', ')||'ninguna'}`,'El acta no aporta cantidades completadas: no se confirma disponibilidad.');
  lines.push(`Estabilidad de referencia: ${output.stability.status}; tallas candidatas: ${output.stability.sizes.join(', ')||'sin determinar'}`,`Verificación declarada con cinta o regla: ${$('confirmed').checked?'sí':'pendiente'}`,`Referencia aceptada: ${$('referenceAccepted').checked?'sí':'pendiente'}`,'','APOYO FOTOGRÁFICO: ESTIMACIONES');
  for(const [view,photo]of Object.entries(state.photos)){const result=photoMeasurement(photo,view);lines.push(`Vista: ${view}`,`Encuadre: ${photo.framing||'Manual'}`,`Detección IA: ${photo.ai?.count===1?photo.ai.visibleCount+' de 33 puntos visibles':'sin detección única conservada'}`,`Apoyos propuestos por IA pendientes de corrección: ${Object.keys(photo.origins||{}).filter(key=>photo.origins[key]==='ai').map(key=>POINTS[key]?.[0]||key).join(', ')||'ninguno'}`);for(const measure of result.measures)lines.push(`${measure.label}: aprox. ${format(measure.value)} cm`);for(const error of result.errors)lines.push(`Revisar: ${error}`);}
  lines.push('','COMPARACIÓN',...output.details,...output.warnings,'','LÍMITES','No existe una tabla universal de tallas. Se utiliza la primera referencia nominal igual o mayor en todas las dimensiones necesarias; es una regla del prototipo y no un intervalo oficial. No se suma holgura automática.','En tablas de prenda se compara cuerpo + holgura mínima explícita del proveedor. Las repeticiones describen variación observada, no un intervalo de confianza ni exactitud validada.','La foto estima distancias visibles, no contornos corporales. MediaPipe orienta postura y encuadre; no certifica centímetros. La perspectiva, ropa y marcado afectan el resultado.','Sin precisión metrológica validada ni margen de error conocido. Verifica con cinta, tabla del proveedor y prueba de prenda; para zapatos mide ambos pies y comprueba el ancho.','Las fotos no se incluyen en este informe.');return lines.join('\r\n');
 }
 function downloadText(text,filename,type='text/plain;charset=utf-8'){const url=URL.createObjectURL(new Blob(['\ufeff',text],{type})),a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);}
 function makeDemo(){
- stopCamera();imageToken++;state.demo=true;state.photos={};state.catalogId=isFoot()?'clarks-kids':state.garment==='skirt'?'eci-nina':'eci-nino';state.measurements={chest:'68',waist:state.garment==='skirt'?'62':'65',hip:'76',leftFoot:'18.5',rightFoot:'18.4',sleeve:'47',inseam:'61',skirtLength:'42'};state.repeats=Object.fromEntries(Object.entries(state.measurements).map(([key,value])=>[key,[value,value,value]]));$('height').value='140';$('reference').value='20';$('confirmed').checked=true;$('referenceAccepted').checked=true;$('demoBanner').hidden=false;
+ stopCamera();imageToken++;state.catalogContext='reference';renderInventorySelection();state.demo=true;state.photos={};state.catalogId=isFoot()?'clarks-kids':state.garment==='skirt'?'eci-nina':'eci-nino';state.measurements={chest:'68',waist:state.garment==='skirt'?'62':'65',hip:'76',leftFoot:'18.5',rightFoot:'18.4',sleeve:'47',inseam:'61',skirtLength:'42'};state.repeats=Object.fromEntries(Object.entries(state.measurements).map(([key,value])=>[key,[value,value,value]]));$('height').value='140';$('reference').value='20';$('confirmed').checked=true;$('referenceAccepted').checked=true;$('demoBanner').hidden=false;
  const source=document.createElement('canvas');source.width=600;source.height=800;const d=source.getContext('2d');d.fillStyle='#eaf0f7';d.fillRect(0,0,600,800);d.fillStyle='#6783a0';
  let points;
  if(isFoot()){d.beginPath();d.moveTo(280,550);d.bezierCurveTo(230,550,220,490,235,420);d.bezierCurveTo(205,330,225,240,270,190);d.bezierCurveTo(300,150,335,175,335,215);d.bezierCurveTo(390,235,375,330,360,400);d.bezierCurveTo(345,470,335,550,280,550);d.fill();d.strokeStyle='#54799e';d.lineWidth=3;d.beginPath();d.moveTo(80,650);d.lineTo(480,650);d.stroke();d.font='20px system-ui';d.fillStyle='#536b84';d.fillText('Referencia ficticia: 20 cm',170,690);points={refA:{x:80,y:650},refB:{x:480,y:650},heel:{x:300,y:550},toe:{x:300,y:180},footL:{x:230,y:350},footR:{x:370,y:350}};}
@@ -368,7 +412,7 @@ function makeDemo(){
  d.fillStyle='#56708b';d.textAlign='center';d.font='16px system-ui';d.fillText('EJEMPLO FICTICIO · SIN DATOS REALES',300,785);
  state.view=isFoot()?'leftFoot':'front';setPhoto(source,{demo:true,points});renderMeasureFields();renderCatalogs();selectStep(3);status('Ejemplo ficticio. Puedes ajustar puntos, verificar las medidas de ejemplo y explorar el resultado.');
 }
-function newSession(){stopCamera();imageToken++;state.photos={};state.measurements={};state.repeats={};state.ease={};$('multiviewAccepted').checked=false;$('autoRecognize').checked=true;state.demo=false;state.view=isFoot()?'leftFoot':'front';$('height').value='';$('reference').value='20';$('measurementMode').value='repeat';$('confirmed').checked=false;$('referenceAccepted').checked=false;$('demoBanner').hidden=true;$('photoInput').value='';$('csvStatus').textContent='';activePoint=pointKeys()[0];canvas.width=1;canvas.height=1;$('loupe').hidden=true;renderMeasureFields();renderCapture();selectStep(1);announce('Nueva sesión lista. Fotos y medidas anteriores descartadas.');}
+function newSession(){stopCamera();imageToken++;state.photos={};state.measurements={};state.repeats={};$('multiviewAccepted').checked=false;$('autoRecognize').checked=true;state.demo=false;state.view=isFoot()?'leftFoot':'front';$('height').value='';$('reference').value='20';$('measurementMode').value='repeat';$('confirmed').checked=false;$('referenceAccepted').checked=false;$('demoBanner').hidden=true;state.catalogContext='inventory';state.catalogId=null;renderInventorySelection();$('photoInput').value='';$('csvStatus').textContent='';activePoint=pointKeys()[0];canvas.width=1;canvas.height=1;$('loupe').hidden=true;renderMeasureFields();renderCatalogs();renderCapture();renderPreparation();selectStep(1);announce('Nueva sesión lista. Fotos y medidas anteriores descartadas.');}
 
 for(const [key,data]of Object.entries(GARMENT_DATA)){const button=node('button',undefined,'garment-card');button.dataset.garment=key;button.setAttribute('aria-pressed',String(key===state.garment));const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');icon.setAttribute('viewBox','0 0 84 78');icon.setAttribute('fill','none');icon.setAttribute('stroke','currentColor');icon.setAttribute('stroke-width','2');icon.setAttribute('stroke-linejoin','round');icon.setAttribute('aria-hidden','true');icon.innerHTML=data.icon;button.append(icon,node('span',data.name,'garment-name'),node('span',data.description,'garment-description'));button.addEventListener('click',()=>setGarment(key));$('garments').append(button);}
 for(const button of $('steps').children)button.addEventListener('click',()=>selectStep(Number(button.dataset.step)));
@@ -395,8 +439,15 @@ $('undoPoint').addEventListener('click',()=>{const photo=currentPhoto();if(!phot
 $('resetPoints').addEventListener('click',()=>{if(!currentPhoto())return;cancelRecognition();snapshotPoints();currentPhoto().points={};currentPhoto().origins={};$('multiviewAccepted').checked=false;activePoint=pointKeys()[0];renderPointControls();drawPhoto();renderPhotoResults();});
 $('height').addEventListener('input',()=>{$('multiviewAccepted').checked=false;renderPhotoResults();});$('reference').addEventListener('input',renderPhotoResults);
 $('catalog').addEventListener('change',()=>{state.catalogId=$('catalog').value;$('referenceAccepted').checked=false;renderCatalogDetails();});
-$('csvTemplate').addEventListener('click',()=>{const rows=isFoot()?'talla,pecho,cintura,cadera,pie_cm\r\nEJEMPLO_1,,,,18.5\r\nEJEMPLO_2,,,,19.3':'talla,pecho,cintura,cadera,pie_cm\r\nEJEMPLO_1,68,65,76,\r\nEJEMPLO_2,74,69,81,';downloadText(rows,'TallaLab-plantilla-tabla.csv','text/csv;charset=utf-8');});
-$('csvInput').addEventListener('change',async event=>{const file=event.target.files[0];event.target.value='';if(!file)return;try{if(file.size>250000)throw new Error('La tabla supera 250 KB.');const garment=state.garment,kind=isFoot()?'foot':$('catalogKind').value,text=await file.text();if(garment!==state.garment)throw new Error('Cambiaste de prenda. Vuelve a importar su tabla.');const catalog=parseCatalogCsv(text,{name:$('supplierName').value.trim()||'Proveedor · tabla importada',garment,kind});catalog.id='custom-'+crypto.randomUUID();catalog.date=new Date().toLocaleDateString('sv-SE');catalog.note=kind==='garment'?'Contornos completos de prenda terminada. Requiere holguras mínimas explícitas del proveedor.':'Tabla de medidas corporales del proveedor. Verifica origen, modelo y unidades.';state.customCatalogs.push(catalog);state.catalogId=catalog.id;$('referenceAccepted').checked=false;renderCatalogs();$('csvStatus').textContent=`Tabla cargada: ${catalog.rows.length} tallas. Confirma su correspondencia antes de usarla.`;}catch(error){$('csvStatus').textContent=error.message;}});
+$('csvTemplate').addEventListener('click',()=>{const rows=state.catalogContext==='inventory'?createInventoryTemplate(selectedInventoryItem().id):isFoot()?'talla,pecho,cintura,cadera,pie_cm\r\nEJEMPLO_1,,,,18.5\r\nEJEMPLO_2,,,,19.3':'talla,pecho,cintura,cadera,pie_cm\r\nEJEMPLO_1,68,65,76,\r\nEJEMPLO_2,74,69,81,';downloadText(rows,'TallaLab-plantilla-tabla.csv','text/csv;charset=utf-8');});
+$('csvInput').addEventListener('change',async event=>{const file=event.target.files[0];event.target.value='';if(!file)return;try{
+ if(file.size>250000)throw new Error('La tabla supera 250 KB.');const garment=state.garment,context=state.catalogContext,itemId=selectedInventoryItem().id,kind=isFoot()?'foot':$('catalogKind').value,text=await file.text();
+ if(garment!==state.garment||context!==state.catalogContext||(context==='inventory'&&itemId!==selectedInventoryItem().id))throw new Error('Cambiaste de artículo. Vuelve a importar su tabla.');
+ const name=$('supplierName').value.trim()||'Proveedor · tabla importada';
+ const catalog=context==='inventory'?parseInventoryCatalogCsv(text,{itemId,kind,name}):parseCatalogCsv(text,{name,garment,kind});catalog.id='custom-'+crypto.randomUUID();catalog.date=new Date().toLocaleDateString('sv-SE');
+ if(context!=='inventory')catalog.note=kind==='garment'?'Contornos completos de prenda terminada. Requiere holguras mínimas explícitas del proveedor.':'Tabla de medidas corporales del proveedor. Verifica origen, modelo y unidades.';
+ state.customCatalogs.push(catalog);state.catalogId=catalog.id;$('referenceAccepted').checked=false;renderCatalogs();$('csvStatus').textContent=`Tabla cargada: ${catalog.rows.length} tallas. Confirma su correspondencia antes de usarla.`;
+ }catch(error){$('csvStatus').textContent=error.message;}});
 $('downloadReport').addEventListener('click',()=>downloadText(reportText(),'TallaLab-informe.txt'));
 $('printReport').addEventListener('click',()=>{$('printArea').replaceChildren(node('h1','TallaLab · Informe de prueba'),node('pre',reportText()));window.print();});
 for(const source of SOURCES){const section=node('div',undefined,'source-item'),a=node('a',source.title);a.href=source.url;a.target='_blank';a.rel='noopener noreferrer';section.append(a,node('p',source.description));$('sourcesList').append(section);}
@@ -408,4 +459,10 @@ $('recognizePhoto').addEventListener('click',()=>{if(recognitionController)cance
 $('autoRecognize').addEventListener('change',()=>{if(!$('autoRecognize').checked){cancelRecognition();if(assistant||assistLoading){disposeAssistant();drawOverlay();$('assistStatus').textContent='Detección automática desactivada. Puedes trabajar manualmente.';}}else if(stream&&!isFoot()&&state.view==='front')void enableAssistant();else if(currentPhoto()&&!isFoot()&&!currentPhoto().demo)void recognizeCurrentPhoto();});
 $('showAiPoints').addEventListener('change',drawPhoto);
 $('aiPointSelect').addEventListener('change',()=>{activeAiPoint=Number($('aiPointSelect').value);renderAiPointHelp();drawPhoto();});
-renderPreparation();renderMeasureFields();renderCatalogs();renderCapture();selectStep(1,false);
+$('catalogContext').addEventListener('change',()=>{stopCamera();state.catalogContext=$('catalogContext').value;state.catalogId=null;$('confirmed').checked=false;$('referenceAccepted').checked=false;renderInventorySelection();renderPreparation();renderCatalogs();});
+$('inventoryItem').addEventListener('change',()=>{stopCamera();state.inventoryItemId=$('inventoryItem').value;const profiles=state.customCatalogs.filter(c=>c.inventoryItemId===state.inventoryItemId);state.catalogId=(profiles.filter(c=>!c.provisional).at(-1)||profiles.at(-1))?.id;$('referenceAccepted').checked=false;renderInventorySelection();renderPreparation();renderCatalogs();});
+$('useProvisionalGuide').addEventListener('click',()=>{try{const item=selectedInventoryItem(),catalog=createProvisionalInventoryCatalog(item.id,{bodyReference:CATALOGS.find(c=>c.id===(item.garment==='skirt'?'eci-nina':'eci-nino')),footReference:CATALOGS.find(c=>c.id==='clarks-kids')});state.customCatalogs=state.customCatalogs.filter(c=>c.id!==catalog.id);state.customCatalogs.push(catalog);state.catalogId=catalog.id;$('referenceAccepted').checked=false;renderCatalogs();announce('Guía provisional cargada. La equivalencia con este uniforme no está validada.');}catch(error){$('inventoryNotice').textContent=error.message;}});
+$('saveInventoryMeasures').addEventListener('click',saveInventoryMeasures);
+$('inventoryEditorSource').addEventListener('input',()=>{$('inventoryEditorConfirmed').checked=false;});
+$('inventoryEditorKind').addEventListener('change',()=>{$('inventoryEditorConfirmed').checked=false;});
+renderInventorySelection();renderPreparation();renderMeasureFields();renderCatalogs();renderCapture();selectStep(1,false);

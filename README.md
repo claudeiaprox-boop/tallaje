@@ -1,4 +1,4 @@
-# TallaLab 2.2
+# TallaLab 2.3
 
 Prototipo de tallaje escolar guiado con cámara para **camisa, pantalón, falda y zapatos**. Combina detección automática con IA, siluetas de encuadre, fotografías y marcado corregible con lupa y comparación con tablas de referencia identificadas.
 
@@ -21,6 +21,20 @@ El modelo preentrenado Google MediaPipe Pose Lite detecta hasta 33 puntos corpor
 - Para el pie se necesita una referencia física en el mismo plano y cámara perpendicular; confirmar la longitud con regla y probar ambos zapatos.
 - Las tablas de ECI y Clarks corresponden a esas marcas; no son estándares universales ni sustituyen la tabla del proveedor escolar. No se añade holgura automáticamente.
 - Las fotos y medidas permanecen en la memoria del navegador. No hay cuentas, almacenamiento remoto ni analítica; los informes se guardan por acción del usuario.
+
+## Tallas del acta (2.3)
+
+El modo inicial incluye las etiquetas exactas de las ocho prendas/modelos del acta de reintegro y zapatos 23–45. No hay cantidades completadas ni centímetros en el documento: enumerar una talla no confirma existencias o equivalencia.
+
+1. Selecciona la categoría y el artículo del acta.
+2. En Verificación, carga una **guía orientativa** o introduce una tabla del proveedor/artículo en el editor. También se puede importar el CSV con etiquetas exactas.
+3. La guía es **provisional**: usa referencias corporales escolares de ECI para etiquetas numéricas compartidas T4–T18; supone correspondencia numérica sin validación del uniforme. Para zapatos supone EU y solo conserva etiquetas enteras 25–40 presentes en Clarks, sin redondear medias tallas. Las etiquetas sin referencia, incluidas T20/T22/T1X/T2X de ropa, siguen pendientes.
+4. Una tabla real exige declarar origen y tipo de medida. Las medidas de prenda terminada requieren holgura mínima indicada por el proveedor. Un ancho plano no equivale a un contorno corporal.
+5. El resultado y el informe conservan la etiqueta del acta, el artículo y el carácter provisional. Si faltan datos, no hay talla única o la tabla no cubre las medidas, se indica en lugar de inventarla.
+
+La imagen aportada ilustra la tabla talla/cm; no es una equivalencia oficial del acta. No se copia automáticamente #16 infantil (68 cm) a T16: la misma imagen usa #16 deportivo con 88 cm. Consulta [el análisis de las referencias](REFERENCIAS-ACTA.md).
+
+Los perfiles y sus holguras permanecen en la memoria de la pestaña para medir varios alumnos. Nueva medición borra fotos/medidas del alumno y exige nuevas confirmaciones; cerrar o recargar la página descarta los datos. No se subieron el PDF ni el JPG originales al repositorio o al sitio.
 
 ## Reconocimiento automático (2.2)
 
@@ -71,6 +85,7 @@ npm install --no-save --package-lock=false playwright
 npm run test:ui
 npm run test:assistant
 npm run test:recognition
+npm run test:inventory
 ```
 
 Las pruebas de interfaz utilizan cámara simulada. El funcionamiento con cámara física y la precisión del tallaje requieren pruebas de campo.

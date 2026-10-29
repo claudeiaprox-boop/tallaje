@@ -1,4 +1,4 @@
-# TallaLab 2.2
+# TallaLab 2.3
 
 Tallaje escolar guiado con cámara, marcado manual, verificación con cinta/regla y comparación con referencias comerciales identificadas. Proyecto Firebase: tallalab-pruebas-20261028.
 
@@ -81,3 +81,10 @@ Consulta [Método y validación pendiente](METODO-PRECISION.md).
 En Cámara deja activado **Detectar puntos automáticamente**. Al activar la cámara frontal aparece el esqueleto detectado; al capturar o cargar una foto, MediaPipe la analiza de nuevo y conserva sus puntos. Puedes seleccionar cualquiera de los 33 puntos para revisarlo y reanalizar con **Reconocer puntos con IA**. Las propuestas numeradas de hombros/codo/muñeca pueden arrastrarse. Las correcciones manuales sobreviven al reanálisis.
 
 El modelo estima articulaciones, no la identidad ni los contornos de confección. Completa coronilla, suelo y bordes necesarios antes de calcular distancias. Para prendas y zapatos mantiene la verificación física del método 2.1. El modelo se ejecuta en el navegador con los recursos del sitio HTTPS; si falla o se cancela, continúa manualmente.
+
+
+## Tallas del acta (2.3)
+
+Elige **Uniformes y tallas del acta** y el artículo concreto. En Verificación, **Cargar guía orientativa de tallas** permite una propuesta provisional con referencias de otra marca. No son las medidas reales de los uniformes; faltan referencias para algunas tallas. Comprueba el resultado antes de encargar o entregar.
+
+En **Completar medidas reales por talla**, introduce los centímetros medidos o publicados por el proveedor y su origen. Guarda y confirma la referencia. Los modelos de camisa, pantalón, short y falda tienen tablas separadas. El resultado mantiene T10, T1X, etc., tal como figuran en el acta. El informe descargado o impreso incluye su carácter provisional o declarado y no inventa cantidades de existencias. Nueva medición conserva perfiles/holguras en la pestaña pero borra los datos del alumno.

@@ -62,6 +62,7 @@ async function open(options = {}) {
   });
   await page.goto(offline ? offlineFile : base, { waitUntil: 'load' });
   await page.locator('#garments button').first().waitFor();
+  await page.locator('#catalogContext').selectOption('reference');
   // These scenarios exercise the manual path; AI has its own recognition suite.
   await page.evaluate(() => { document.querySelector('#autoRecognize').checked = false; });
   async function finish() {
@@ -83,6 +84,7 @@ async function garment(page, value) {
 }
 
 async function fillMeasurements(page, measurements) {
+  await page.evaluate(() => { const select=document.querySelector('#catalogContext'); if(select.value!=='reference'){select.value='reference';select.dispatchEvent(new Event('change'));} });
   if (await page.locator('#measurementMode').inputValue() !== 'single') await page.locator('#measurementMode').selectOption('single');
   for (const [key, value] of Object.entries(measurements)) await page.locator(`#measure-${key}`).fill(String(value));
 }
